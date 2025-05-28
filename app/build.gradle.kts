@@ -57,4 +57,17 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation ("androidx.compose.material:material-icons-extended:1.5.4")
+    // Google Drive API
+    implementation ("com.google.api-client:google-api-client-android:2.8.0")
+    implementation ("com.google.http-client:google-http-client:1.43.3")
+    implementation("com.google.apis:google-api-services-drive:v3-rev20250511-2.0.0")
+    implementation("com.google.auth:google-auth-library-oauth2-http:1.11.0")
+    implementation("com.google.android.gms:play-services-auth:20.4.1")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
+    // Google Drive API
+    implementation("com.google.api-client:google-api-client-android:2.8.0")
+    implementation("com.google.http-client:google-http-client:1.43.3")
+
+// Coroutines (if not already added)
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
 }
