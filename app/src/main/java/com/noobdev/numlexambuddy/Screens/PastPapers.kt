@@ -20,6 +20,7 @@ package com.noobdev.numlexambuddy.Screens
         import androidx.compose.material.icons.Icons
         import androidx.compose.material.icons.filled.ArrowDropDown
         import androidx.compose.material.icons.filled.Search
+        import androidx.compose.material.icons.automirrored.outlined.ArrowBack
         import androidx.compose.material.icons.rounded.FilterList
         import androidx.compose.material.icons.rounded.History
         import androidx.compose.material.icons.rounded.School
@@ -62,7 +63,8 @@ package com.noobdev.numlexambuddy.Screens
 fun PastPapersScreen(
     viewModel: PastPapersViewModel = viewModel(
         factory = PastPapersViewModelFactory(LocalContext.current)
-    )
+    ),
+    onBack: () -> Unit = {}
 ) {
     val departments = listOf(
         Department("Computer Science", "BSCS"),
@@ -93,20 +95,30 @@ fun PastPapersScreen(
                     paper.title.contains(searchQuery, ignoreCase = true) ||
                     paper.subject.contains(searchQuery, ignoreCase = true)
         }
-    }
-
+    }   
     Scaffold(
         topBar = {
-            SmallTopAppBar(
+            TopAppBar(
                 title = {
                     Text(
                         "Past Papers",
                         fontWeight = FontWeight.Bold
                     )
                 },
-                colors = TopAppBarDefaults.smallTopAppBarColors(
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            Icons.AutoMirrored.Outlined.ArrowBack,
+                            contentDescription = "Go back",
+                            tint = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
+                    actionIconContentColor = MaterialTheme.colorScheme.onPrimary
                 ),
                 actions = {
                     IconButton(onClick = { isSearchActive = !isSearchActive }) {
@@ -288,8 +300,7 @@ fun PastPapersScreen(
                     }
                 }
             }
-
-            Divider(
+            HorizontalDivider(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 16.dp),
@@ -613,12 +624,12 @@ fun PaperCard(
             }
         }
     }
-}
-
-        @Preview(showBackground = true)
+}        @Preview(showBackground = true)
         @Composable
         fun PastPapersScreenPreview() {
             NumlExamBuddyTheme {
-                PastPapersScreen()
+                PastPapersScreen(
+                    onBack = {}
+                )
             }
         }

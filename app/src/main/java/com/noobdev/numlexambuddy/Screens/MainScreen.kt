@@ -1,5 +1,6 @@
 package com.noobdev.numlexambuddy.Screens
 
+import android.R.attr.shape
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
@@ -17,7 +18,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.*
+import androidx.compose.material.icons.automirrored.outlined.Help
+import androidx.compose.material.icons.automirrored.outlined.MenuBook
+import androidx.compose.material.icons.automirrored.outlined.NoteAdd
 import androidx.compose.material.icons.rounded.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -58,7 +63,9 @@ data class FeatureItem(
  */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
-fun MainScreen() {
+fun MainScreen(
+    onNavigateToPastPapers: () -> Unit = {}
+) {
     // Coroutine scope for animations
     val scope = rememberCoroutineScope()
 
@@ -95,6 +102,8 @@ fun MainScreen() {
         }
     }
 
+
+
     // Feature items definition with more subtle gradients and professional icons
     val featureItems = remember {
         listOf(
@@ -109,10 +118,9 @@ fun MainScreen() {
                 Icons.Outlined.VideoLibrary,
                 GradientSlate,
                 "Watch recorded lectures"
-            ),
-            FeatureItem(
+            ),            FeatureItem(
                 "Study Material",
-                Icons.Outlined.MenuBook,
+                Icons.AutoMirrored.Outlined.MenuBook,
                 GradientDeepBlue,
                 "Access notes and study guides"
             ),
@@ -127,10 +135,9 @@ fun MainScreen() {
                 Icons.Outlined.RateReview,
                 GradientCharcoal,
                 "Read and write professor reviews"
-            ),
-            FeatureItem(
+            ),            FeatureItem(
                 "Add Documents",
-                Icons.Outlined.NoteAdd,
+                Icons.AutoMirrored.Outlined.NoteAdd,
                 GradientGray,
                 "Contribute study documents"
             ),
@@ -254,9 +261,16 @@ fun MainScreen() {
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(500.dp) // Fixed height for proper preview
-                        ) {
-                            items(featureItems.take(visibleItems)) { item ->
-                                FeatureCard(feature = item)
+                        ) {                            items(featureItems.take(visibleItems)) { item ->
+                                FeatureCard(
+                                    feature = item,
+                                    onClick = {
+                                        when(item.title) {
+                                            "Past Papers" -> onNavigateToPastPapers()
+                                            // Add other navigation routes as they are implemented
+                                        }
+                                    }
+                                )
                             }
                         }
                     }
@@ -279,8 +293,7 @@ fun MainScreen() {
                     containerColor = MaterialTheme.colorScheme.secondary,
                     contentColor = MaterialTheme.colorScheme.onSecondary
                 ) {
-                    Icon(
-                        Icons.Outlined.Help,
+                    Icon(                        Icons.AutoMirrored.Outlined.Help,
                         contentDescription = "Help"
                     )
                 }
@@ -537,7 +550,10 @@ fun SearchBar() {
  * Enhanced feature card with elegant hover and press animations
  */
 @Composable
-fun FeatureCard(feature: FeatureItem) {
+fun FeatureCard(
+    feature: FeatureItem,
+    onClick: () -> Unit = {}
+) {
     // State for animations
     var isPressed by remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
@@ -563,9 +579,7 @@ fun FeatureCard(feature: FeatureItem) {
             else -> 1f
         },
         animationSpec = tween(200)
-    )
-
-    // Subtle border animation on hover
+    )    // Subtle border animation on hover
     val borderWidth by animateFloatAsState(
         targetValue = if (isHovered) 0.5f else 0f,
         animationSpec = tween(200)
@@ -582,6 +596,7 @@ fun FeatureCard(feature: FeatureItem) {
                 indication = null
             ) {
                 isPressed = true
+                onClick()
             },
         shape = RoundedCornerShape(6.dp),
         border = if (borderWidth > 0)
@@ -682,11 +697,10 @@ fun FeatureCard(feature: FeatureItem) {
                             color = Color.White,
                             style = MaterialTheme.typography.labelMedium
                         )
-                        Icon(
-                            Icons.Rounded.KeyboardArrowRight,
-                            contentDescription = null,
-                            tint = Color.White,
-                            modifier = Modifier.size(16.dp)
+                        Icon(                        Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(16.dp)
                         )
                     }
                 }
@@ -710,6 +724,8 @@ fun FeatureCard(feature: FeatureItem) {
 @Composable
 fun MainScreenPreview() {
     NumlExamBuddyTheme {
-        MainScreen()
+        MainScreen(
+            onNavigateToPastPapers = {}
+        )
     }
 }
