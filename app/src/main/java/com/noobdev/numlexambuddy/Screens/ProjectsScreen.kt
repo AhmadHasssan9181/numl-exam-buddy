@@ -90,10 +90,9 @@ fun ProjectsScreen(
             selectedSubject = null
         }
     }
-
     LaunchedEffect(selectedSemester) {
         if (selectedDepartment != null && selectedSemester != null) {
-            viewModel.loadSubjects(selectedDepartment!!.code, selectedSemester!!.toString())
+            viewModel.loadSubjects(selectedDepartment!!.code, "SEMESTER-${selectedSemester!!}")
             selectedSubject = null
         }
     }
@@ -102,7 +101,7 @@ fun ProjectsScreen(
         if (selectedDepartment != null && selectedSemester != null && selectedSubject != null) {
             viewModel.loadProjects(
                 selectedDepartment!!.code,
-                selectedSemester!!.toString(),
+                "SEMESTER-${selectedSemester!!}",
                 selectedSubject!!
             )
         }
