@@ -49,15 +49,44 @@ package com.noobdev.numlexambuddy.Screens
         import java.lang.System.exit
 
 data class Department(val name: String, val code: String)
-        data class Paper(
-            val title: String,
-            val subject: String,
-            val semester: Int,
-            val year: String,
-            val department: String,
-            val fileId: String = "",
-            val downloadUrl: String = ""
-        )
+data class Paper(
+    val title: String,
+    val subject: String,
+    val semester: Int,
+    val year: String,
+    val department: String,
+    val fileId: String = "",
+    val downloadUrl: String = ""
+)
+
+data class Lecture(
+    val title: String,
+    val subject: String,
+    val semester: Int,
+    val type: String, // "Slides", "Video", etc.
+    val department: String,
+    val fileId: String = "",
+    val downloadUrl: String = ""
+)
+
+data class StudyMaterial(
+    val title: String,
+    val subject: String,
+    val semester: Int,
+    val type: String, // "PDF Notes", "Word Document", etc.
+    val department: String,
+    val fileId: String = "",
+    val downloadUrl: String = "",
+    val size: String = "" // File size information
+)
+
+data class Project(
+    val id: String,
+    val name: String,
+    val size: String,
+    val downloadUrl: String,
+    val mimeType: String
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

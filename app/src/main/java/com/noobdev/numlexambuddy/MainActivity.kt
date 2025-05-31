@@ -21,6 +21,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.noobdev.numlexambuddy.Screens.MainScreen
 import com.noobdev.numlexambuddy.Screens.PastPapersScreen
+import com.noobdev.numlexambuddy.Screens.LecturesScreen
+import com.noobdev.numlexambuddy.Screens.StudyMaterialScreen
+import com.noobdev.numlexambuddy.Screens.ProjectsScreen
 import com.noobdev.numlexambuddy.Screens.TestDriveScreen
 import com.noobdev.numlexambuddy.navigation.NavRoutes
 import com.noobdev.numlexambuddy.ui.theme.NumlExamBuddyTheme
@@ -60,18 +63,26 @@ fun AppNavHost(
         navController = navController,
         startDestination = NavRoutes.MAIN_SCREEN,
         modifier = modifier
-    ) {
-        composable(NavRoutes.MAIN_SCREEN) {
+    ) {        composable(NavRoutes.MAIN_SCREEN) {
             MainScreen(
                 onNavigateToPastPapers = {
                     navController.navigate(NavRoutes.PAST_PAPERS)
+                },
+                onNavigateToLectures = {
+                    navController.navigate(NavRoutes.LECTURES)
+                },
+                onNavigateToStudyMaterial = {
+                    navController.navigate(NavRoutes.STUDY_MATERIAL)
+                },
+                onNavigateToProjects = {
+                    navController.navigate(NavRoutes.PROJECTS)
                 },
                 onNavigateToTestDrive = {
                     navController.navigate(NavRoutes.TEST_DRIVE)
                 }
             )
         }
-        composable(NavRoutes.PAST_PAPERS) {
+    composable(NavRoutes.PAST_PAPERS) {
             // Implement back button handling for system navigation 
             BackHandler {
                 navController.popBackStack()
@@ -79,6 +90,42 @@ fun AppNavHost(
             
             PastPapersScreen(
                 onBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+        
+        composable(NavRoutes.LECTURES) {
+            BackHandler {
+                navController.popBackStack()
+            }
+
+            LecturesScreen(
+                onBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+        
+        composable(NavRoutes.STUDY_MATERIAL) {
+            BackHandler {
+                navController.popBackStack()
+            }
+            
+            StudyMaterialScreen(
+                onBackClick = {
+                    navController.popBackStack()
+                }
+            )
+        }
+        
+        composable(NavRoutes.PROJECTS) {
+            BackHandler {
+                navController.popBackStack()
+            }
+            
+            ProjectsScreen(
+                onBackClick = {
                     navController.popBackStack()
                 }
             )

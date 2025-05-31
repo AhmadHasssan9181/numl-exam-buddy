@@ -65,6 +65,9 @@ data class FeatureItem(
 @Composable
 fun MainScreen(
     onNavigateToPastPapers: () -> Unit = {},
+    onNavigateToLectures: () -> Unit = {},
+    onNavigateToStudyMaterial: () -> Unit = {},
+    onNavigateToProjects: () -> Unit = {},
     onNavigateToTestDrive: () -> Unit = {}
 ) {
     // Coroutine scope for animations
@@ -123,12 +126,17 @@ fun MainScreen(
                 Icons.Outlined.VideoLibrary,
                 GradientSlate,
                 "Watch recorded lectures"
-            ),            
-            FeatureItem(
+            ),              FeatureItem(
                 "Study Material",
                 Icons.AutoMirrored.Outlined.MenuBook,
                 GradientDeepBlue,
                 "Access notes and study guides"
+            ),
+            FeatureItem(
+                "Projects",
+                Icons.Outlined.Folder,
+                GradientTeal,
+                "Browse student projects"
             ),
             FeatureItem(
                 "Upload Papers",
@@ -268,12 +276,14 @@ fun MainScreen(
                                 .fillMaxWidth()
                                 .height(500.dp) // Fixed height for proper preview
                         ) {
-                            items(featureItems.take(visibleItems)) { item ->
-                                FeatureCard(
+                            items(featureItems.take(visibleItems)) { item ->                                FeatureCard(
                                     feature = item,
                                     onClick = {
                                         when(item.title) {
                                             "Past Papers" -> onNavigateToPastPapers()
+                                            "Lectures" -> onNavigateToLectures()
+                                            "Study Material" -> onNavigateToStudyMaterial()
+                                            "Projects" -> onNavigateToProjects()
                                             "Test Drive API" -> onNavigateToTestDrive()
                                             // Add other navigation routes as they are implemented
                                         }
