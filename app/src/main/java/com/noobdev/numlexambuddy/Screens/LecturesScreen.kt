@@ -46,6 +46,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.material3.CircularProgressIndicator
 import com.noobdev.numlexambuddy.viewmodel.LecturesViewModel
 import com.noobdev.numlexambuddy.viewmodel.LecturesViewModelFactory
+import com.noobdev.numlexambuddy.model.Department
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -548,6 +549,90 @@ fun LectureCard(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun DepartmentChip(
+    department: Department,
+    selected: Boolean,
+    onSelect: () -> Unit
+) {
+    val backgroundColor = if (selected)
+        MaterialTheme.colorScheme.primaryContainer
+    else
+        MaterialTheme.colorScheme.surface
+
+    val textColor = if (selected)
+        MaterialTheme.colorScheme.onPrimaryContainer
+    else
+        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+
+    val scale by animateFloatAsState(
+        targetValue = if (selected) 1.05f else 1f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        )
+    )
+
+    Surface(
+        modifier = Modifier
+            .scale(scale)
+            .clip(RoundedCornerShape(20.dp))
+            .clickable { onSelect() },
+        color = backgroundColor,
+        shadowElevation = if (selected) 2.dp else 0.dp
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+        ) {
+            Text(
+                text = department.name,
+                color = textColor,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
+            )
+        }
+    }
+}
+
+@Composable
+private fun SemesterChip(
+    semester: Int,
+    selected: Boolean,
+    onSelect: () -> Unit
+) {
+    val backgroundColor = if (selected)
+        MaterialTheme.colorScheme.secondaryContainer
+    else
+        MaterialTheme.colorScheme.surface
+
+    val textColor = if (selected)
+        MaterialTheme.colorScheme.onSecondaryContainer
+    else
+        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+
+    Box(
+        modifier = Modifier
+            .size(40.dp)
+            .clip(CircleShape)
+            .background(backgroundColor)
+            .clickable { onSelect() }
+            .border(
+                width = if (selected) 0.dp else 1.dp,
+                color = if (selected) Color.Transparent else MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+                shape = CircleShape
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = semester.toString(),
+            color = textColor,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
+        )
     }
 }
 

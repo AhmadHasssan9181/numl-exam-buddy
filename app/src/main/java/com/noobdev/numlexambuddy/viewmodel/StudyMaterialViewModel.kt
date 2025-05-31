@@ -5,7 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.noobdev.numlexambuddy.Screens.StudyMaterial
+import com.noobdev.numlexambuddy.model.StudyMaterial
 import com.noobdev.numlexambuddy.data.StudyMaterialRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

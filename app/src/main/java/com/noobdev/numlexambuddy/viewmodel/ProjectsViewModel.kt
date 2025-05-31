@@ -5,7 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.noobdev.numlexambuddy.Screens.Project
+import com.noobdev.numlexambuddy.model.Project
 import com.noobdev.numlexambuddy.data.ProjectsRepository
 import com.noobdev.numlexambuddy.utils.GoogleDriveHelper
 import kotlinx.coroutines.flow.MutableStateFlow

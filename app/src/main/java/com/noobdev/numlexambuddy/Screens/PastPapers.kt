@@ -489,14 +489,12 @@ fun PastPapersScreen(
             }
         }
     }
-}
-
-        @Composable
-        fun DepartmentChip(
-            department: Department,
-            selected: Boolean,
-            onSelect: () -> Unit
-        ) {
+}@Composable
+private fun DepartmentChip(
+    department: Department,
+    selected: Boolean,
+    onSelect: () -> Unit
+) {
             val backgroundColor = if (selected)
                 MaterialTheme.colorScheme.primaryContainer
             else
@@ -535,14 +533,12 @@ fun PastPapersScreen(
                     )
                 }
             }
-        }
-
-        @Composable
-        fun SemesterChip(
-            semester: Int,
-            selected: Boolean,
-            onSelect: () -> Unit
-        ) {
+        }@Composable
+private fun SemesterChip(
+    semester: Int,
+    selected: Boolean,
+    onSelect: () -> Unit
+) {
             val backgroundColor = if (selected)
                 MaterialTheme.colorScheme.secondaryContainer
             else

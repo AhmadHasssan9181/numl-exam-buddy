@@ -1,7 +1,7 @@
 package com.noobdev.numlexambuddy.data
 
 import com.google.api.services.drive.Drive
-import com.noobdev.numlexambuddy.Screens.StudyMaterial
+import com.noobdev.numlexambuddy.model.StudyMaterial
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
