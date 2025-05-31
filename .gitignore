@@ -13,3 +13,7 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Sensitive files - Google Cloud Service Account credentials
+**/service_account.json
+service_account.json
