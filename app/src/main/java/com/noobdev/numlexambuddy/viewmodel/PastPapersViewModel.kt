@@ -51,14 +51,12 @@ class PastPapersViewModel(
                 _loading.value = false
             }
         }
-    }
-
-    // Called when a semester is selected
+    }    // Called when a semester is selected
     fun selectSemester(degree: String, semester: Int) {
         _loading.value = true
         viewModelScope.launch {
             try {
-                val semesterName = "Semester-$semester"
+                val semesterName = "SEMESTER-$semester"
                 _subjects.value = repository.getSubjects(degree, semesterName)
 
                 // Clear previous papers selection
@@ -70,14 +68,12 @@ class PastPapersViewModel(
                 _loading.value = false
             }
         }
-    }
-
-    // Called when a subject is selected
+    }    // Called when a subject is selected
     fun selectSubject(degree: String, semester: Int, subject: String) {
         _loading.value = true
         viewModelScope.launch {
             try {
-                val semesterName = "Semester-$semester"
+                val semesterName = "SEMESTER-$semester"
                 _papers.value = repository.getPastPapers(degree, semesterName, subject)
 
             } catch (e: Exception) {
@@ -88,9 +84,20 @@ class PastPapersViewModel(
         }
     }    // Helper function to download a paper
     fun downloadPaper(paper: Paper) {
-        // In a real app, you'd implement downloading functionality here
-        // For now, we'll just show a message
-        _error.value = "Download functionality coming soon!"
+        viewModelScope.launch {
+            try {
+                if (paper.downloadUrl.isNotEmpty()) {
+                    // Open the Google Drive file link in browser
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(paper.downloadUrl))
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    context.startActivity(intent)
+                } else {
+                    _error.value = "Download link not available for this paper"
+                }
+            } catch (e: Exception) {
+                _error.value = "Error opening download link: ${e.message}"
+            }
+        }
     }
     // Add this method after downloadPaper()
     fun clearError() {

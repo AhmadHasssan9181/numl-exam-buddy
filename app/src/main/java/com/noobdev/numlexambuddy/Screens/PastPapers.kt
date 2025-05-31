@@ -46,8 +46,9 @@ package com.noobdev.numlexambuddy.Screens
         import androidx.compose.material3.CircularProgressIndicator
         import com.noobdev.numlexambuddy.viewmodel.PastPapersViewModel
         import com.noobdev.numlexambuddy.viewmodel.PastPapersViewModelFactory
+        import java.lang.System.exit
 
-        data class Department(val name: String, val code: String)
+data class Department(val name: String, val code: String)
         data class Paper(
             val title: String,
             val subject: String,
@@ -377,10 +378,9 @@ fun PastPapersScreen(
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
                         )
-                    }
-
-                    // Paper list
-                    if (filteredPapers.isEmpty()) {
+                    }                    // Paper list
+                    if (filteredPapers.isEmpty() && selectedDepartment != null && selectedSemester != null && selectedSubject != null) {
+                        // Show this only when all filters are selected but no papers found
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -402,7 +402,37 @@ fun PastPapersScreen(
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Text(
-                                    "Try adjusting your filters",
+                                    "No past papers available for this subject",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        }
+                    } else if (selectedDepartment == null || selectedSemester == null || selectedSubject == null) {
+                        // Show instruction when filters are not fully selected
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 32.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Icon(
+                                    Icons.Rounded.FilterList,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
+                                    modifier = Modifier.size(48.dp)
+                                )
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Text(
+                                    "Select filters to view papers",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    "Choose department, semester, and subject to see available past papers",
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
                                     textAlign = TextAlign.Center
@@ -604,7 +634,6 @@ fun PaperCard(
                             )
                         }
                     }
-
             AnimatedVisibility(
                 visible = isHovered,
                 enter = fadeIn(tween(200)),
@@ -617,14 +646,18 @@ fun PaperCard(
                         .padding(top = 12.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primary
-                    )
+                    ),
+                    enabled = paper.downloadUrl.isNotEmpty()
                 ) {
-                    Text("Download Paper")
+                    Text(
+                        if (paper.downloadUrl.isNotEmpty()) "View Paper" else "Download Unavailable"
+                    )
                 }
             }
         }
     }
-}        @Preview(showBackground = true)
+}
+@Preview(showBackground = true)
         @Composable
         fun PastPapersScreenPreview() {
             NumlExamBuddyTheme {

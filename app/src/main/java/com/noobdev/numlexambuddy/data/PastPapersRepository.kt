@@ -11,12 +11,11 @@ package com.noobdev.numlexambuddy.data
 
             // Cache for folder structures to minimize API calls
             private val folderCache = mutableMapOf<String, String>()
-
             suspend fun getSemesters(degreeProgram: String): List<String> = withContext(Dispatchers.IO) {
                 try {
                     val driveService = driveServiceManager.getDriveService()
                     val degreeFolderId = getFolderId(rootFolderId, degreeProgram)
-                        ?: throw FolderNotFoundException(degreeProgram)
+                        ?: throw FolderNotFoundException("Department folder '$degreeProgram' not found")
 
                     val result = driveService.files().list()
                         .setQ("'$degreeFolderId' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false")
@@ -24,19 +23,24 @@ package com.noobdev.numlexambuddy.data
                         .setFields("files(id, name)")
                         .execute()
 
-                    return@withContext result.files.map { it.name }.sorted()
+                    val semesters = result.files.map { it.name }.sorted()
+                    if (semesters.isEmpty()) {
+                        throw Exception("No semesters found for $degreeProgram")
+                    }
+                    return@withContext semesters
+                } catch (e: FolderNotFoundException) {
+                    throw e
                 } catch (e: Exception) {
-                    throw Exception("Failed to get semesters: ${e.message}")
+                    throw Exception("Failed to get semesters for $degreeProgram: ${e.message}")
                 }
             }
-
             suspend fun getSubjects(degreeProgram: String, semester: String): List<String> = withContext(Dispatchers.IO) {
                 try {
                     val driveService = driveServiceManager.getDriveService()
                     val degreeFolderId = getFolderId(rootFolderId, degreeProgram)
-                        ?: throw FolderNotFoundException(degreeProgram)
+                        ?: throw FolderNotFoundException("Department folder '$degreeProgram' not found")
                     val semesterFolderId = getFolderId(degreeFolderId, semester)
-                        ?: throw FolderNotFoundException(semester)
+                        ?: throw FolderNotFoundException("Semester folder '$semester' not found in $degreeProgram")
 
                     val result = driveService.files().list()
                         .setQ("'$semesterFolderId' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false")
@@ -44,9 +48,15 @@ package com.noobdev.numlexambuddy.data
                         .setFields("files(id, name)")
                         .execute()
 
-                    return@withContext result.files.map { it.name }.sorted()
+                    val subjects = result.files.map { it.name }.sorted()
+                    if (subjects.isEmpty()) {
+                        throw Exception("No subjects found for $degreeProgram $semester")
+                    }
+                    return@withContext subjects
+                } catch (e: FolderNotFoundException) {
+                    throw e
                 } catch (e: Exception) {
-                    throw Exception("Failed to get subjects: ${e.message}")
+                    throw Exception("Failed to get subjects for $degreeProgram $semester: ${e.message}")
                 }
             }
 
@@ -54,16 +64,15 @@ package com.noobdev.numlexambuddy.data
                 try {
                     val driveService = driveServiceManager.getDriveService()
                     val degreeFolderId = getFolderId(rootFolderId, degreeProgram)
-                        ?: throw FolderNotFoundException(degreeProgram)
+                        ?: throw FolderNotFoundException("Department folder '$degreeProgram' not found")
                     val semesterFolderId = getFolderId(degreeFolderId, semester)
-                        ?: throw FolderNotFoundException(semester)
+                        ?: throw FolderNotFoundException("Semester folder '$semester' not found")
                     val subjectFolderId = getFolderId(semesterFolderId, subject)
-                        ?: throw FolderNotFoundException(subject)
-
-                    // Try to find a "past papers" folder
+                        ?: throw FolderNotFoundException("Subject folder '$subject' not found")// Try to find the "pastpaper" folder (based on drive structure)
                     val pastPapersFolderId = try {
-                        getFolderId(subjectFolderId, "past papers")
-                            ?: getFolderId(subjectFolderId, "Past Papers")
+                        getFolderId(subjectFolderId, "pastpaper")
+                            ?: getFolderId(subjectFolderId, "past papers")  // fallback
+                            ?: getFolderId(subjectFolderId, "Past Papers")  // fallback
                             ?: subjectFolderId  // If no specific past papers folder, use subject folder
                     } catch (e: Exception) {
                         subjectFolderId  // Default to subject folder
@@ -76,7 +85,6 @@ package com.noobdev.numlexambuddy.data
                         .execute()
 
                     val semNumber = extractSemesterNumber(semester)
-
                     return@withContext result.files.map { file ->
                         Paper(
                             title = extractExamType(file.name),
@@ -85,11 +93,17 @@ package com.noobdev.numlexambuddy.data
                             year = extractYear(file.name),
                             department = degreeProgram,
                             fileId = file.id,
-                            downloadUrl = file.webViewLink
+                            downloadUrl = file.webViewLink ?: ""
                         )
+                    }.also { papers ->
+                        if (papers.isEmpty()) {
+                            throw Exception("No past papers found for $subject in $degreeProgram $semester")
+                        }
                     }
+                } catch (e: FolderNotFoundException) {
+                    throw e
                 } catch (e: Exception) {
-                    throw Exception("Failed to get past papers: ${e.message}")
+                    throw Exception("Failed to get past papers for $subject: ${e.message}")
                 }
             }
 
@@ -112,11 +126,9 @@ package com.noobdev.numlexambuddy.data
                     folderCache[cacheKey] = folderId
                 }
                 return folderId
-            }
-
-            // Helper to extract semester number from folder name
+            }            // Helper to extract semester number from folder name
             private fun extractSemesterNumber(semesterName: String): Int {
-                val regex = "Semester-?(\\d+)".toRegex()
+                val regex = Regex("SEMESTER-?(\\d+)", RegexOption.IGNORE_CASE)
                 val matchResult = regex.find(semesterName)
                 return matchResult?.groupValues?.get(1)?.toIntOrNull() ?: 0
             }
