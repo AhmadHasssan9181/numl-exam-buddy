@@ -31,11 +31,31 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+    
     kotlinOptions {
         jvmTarget = "11"
     }
+    
     buildFeatures {
         compose = true
+    }
+    
+    packaging {
+        resources {
+            excludes += listOf(
+                "META-INF/INDEX.LIST",
+                "META-INF/DEPENDENCIES",
+                "META-INF/LICENSE",
+                "META-INF/LICENSE.txt",
+                "META-INF/license.txt",
+                "META-INF/NOTICE",
+                "META-INF/NOTICE.txt",
+                "META-INF/notice.txt",
+                "META-INF/*.kotlin_module",
+                "META-INF/AL2.0",
+                "META-INF/LGPL2.1"
+            )
+        }
     }
 }
 
@@ -49,6 +69,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation("androidx.navigation:navigation-compose:2.7.7")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -56,18 +77,16 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-    implementation ("androidx.compose.material:material-icons-extended:1.5.4")
-    // Google Drive API
-    implementation ("com.google.api-client:google-api-client-android:2.8.0")
-    implementation ("com.google.http-client:google-http-client:1.43.3")
+    implementation("androidx.compose.material:material-icons-extended:1.5.4")
+    
+    // Google Drive API - Single instances of each dependency
+    implementation("com.google.api-client:google-api-client-android:2.8.0")
+    implementation("com.google.http-client:google-http-client:1.43.3")
     implementation("com.google.apis:google-api-services-drive:v3-rev20250511-2.0.0")
     implementation("com.google.auth:google-auth-library-oauth2-http:1.11.0")
     implementation("com.google.android.gms:play-services-auth:20.4.1")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
-    // Google Drive API
-    implementation("com.google.api-client:google-api-client-android:2.8.0")
-    implementation("com.google.http-client:google-http-client:1.43.3")
 
-// Coroutines (if not already added)
+    // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
 }

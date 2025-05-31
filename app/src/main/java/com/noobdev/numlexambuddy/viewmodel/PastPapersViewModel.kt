@@ -86,9 +86,7 @@ class PastPapersViewModel(
                 _loading.value = false
             }
         }
-    }
-
-    // Helper function to download a paper
+    }    // Helper function to download a paper
     fun downloadPaper(paper: Paper) {
         // In a real app, you'd implement downloading functionality here
         // For now, we'll just show a message
@@ -97,17 +95,5 @@ class PastPapersViewModel(
     // Add this method after downloadPaper()
     fun clearError() {
         _error.value = null
-    }
-}
-
-// Factory to create the ViewModel with dependencies
-class PastPapersViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(PastPapersViewModel::class.java)) {
-            val repository = PastPapersRepository(DriveServiceManager(context=context))
-            return PastPapersViewModel(repository, context) as T
-        }
-        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }

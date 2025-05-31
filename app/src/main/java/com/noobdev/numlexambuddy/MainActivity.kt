@@ -21,6 +21,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.noobdev.numlexambuddy.Screens.MainScreen
 import com.noobdev.numlexambuddy.Screens.PastPapersScreen
+import com.noobdev.numlexambuddy.Screens.TestDriveScreen
 import com.noobdev.numlexambuddy.navigation.NavRoutes
 import com.noobdev.numlexambuddy.ui.theme.NumlExamBuddyTheme
 
@@ -55,8 +56,7 @@ class MainActivity : ComponentActivity() {
 fun AppNavHost(
     navController: NavHostController,
     modifier: Modifier = Modifier
-) {
-    NavHost(
+) {    NavHost(
         navController = navController,
         startDestination = NavRoutes.MAIN_SCREEN,
         modifier = modifier
@@ -65,16 +65,31 @@ fun AppNavHost(
             MainScreen(
                 onNavigateToPastPapers = {
                     navController.navigate(NavRoutes.PAST_PAPERS)
+                },
+                onNavigateToTestDrive = {
+                    navController.navigate(NavRoutes.TEST_DRIVE)
                 }
             )
         }
-          composable(NavRoutes.PAST_PAPERS) {
+        composable(NavRoutes.PAST_PAPERS) {
             // Implement back button handling for system navigation 
             BackHandler {
                 navController.popBackStack()
             }
             
             PastPapersScreen(
+                onBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+        composable(NavRoutes.TEST_DRIVE) {
+            // Implement back button handling
+            BackHandler {
+                navController.popBackStack()
+            }
+            
+            TestDriveScreen(
                 onBack = {
                     navController.popBackStack()
                 }

@@ -64,7 +64,8 @@ data class FeatureItem(
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
 fun MainScreen(
-    onNavigateToPastPapers: () -> Unit = {}
+    onNavigateToPastPapers: () -> Unit = {},
+    onNavigateToTestDrive: () -> Unit = {}
 ) {
     // Coroutine scope for animations
     val scope = rememberCoroutineScope()
@@ -102,8 +103,6 @@ fun MainScreen(
         }
     }
 
-
-
     // Feature items definition with more subtle gradients and professional icons
     val featureItems = remember {
         listOf(
@@ -114,11 +113,18 @@ fun MainScreen(
                 "Access previous exam papers"
             ),
             FeatureItem(
+                "Test Drive API",
+                Icons.Outlined.Dns,
+                GradientPurple,
+                "Test Google Drive connection"
+            ),
+            FeatureItem(
                 "Lectures",
                 Icons.Outlined.VideoLibrary,
                 GradientSlate,
                 "Watch recorded lectures"
-            ),            FeatureItem(
+            ),            
+            FeatureItem(
                 "Study Material",
                 Icons.AutoMirrored.Outlined.MenuBook,
                 GradientDeepBlue,
@@ -261,12 +267,14 @@ fun MainScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(500.dp) // Fixed height for proper preview
-                        ) {                            items(featureItems.take(visibleItems)) { item ->
+                        ) {
+                            items(featureItems.take(visibleItems)) { item ->
                                 FeatureCard(
                                     feature = item,
                                     onClick = {
                                         when(item.title) {
                                             "Past Papers" -> onNavigateToPastPapers()
+                                            "Test Drive API" -> onNavigateToTestDrive()
                                             // Add other navigation routes as they are implemented
                                         }
                                     }
@@ -293,7 +301,8 @@ fun MainScreen(
                     containerColor = MaterialTheme.colorScheme.secondary,
                     contentColor = MaterialTheme.colorScheme.onSecondary
                 ) {
-                    Icon(                        Icons.AutoMirrored.Outlined.Help,
+                    Icon(
+                        Icons.AutoMirrored.Outlined.Help,
                         contentDescription = "Help"
                     )
                 }
@@ -697,7 +706,8 @@ fun FeatureCard(
                             color = Color.White,
                             style = MaterialTheme.typography.labelMedium
                         )
-                        Icon(                        Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+                        Icon(
+                            Icons.AutoMirrored.Rounded.KeyboardArrowRight,
                         contentDescription = null,
                         tint = Color.White,
                         modifier = Modifier.size(16.dp)

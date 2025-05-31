@@ -45,3 +45,4 @@ val GradientCharcoal = listOf(Color(0xFF263238), Color(0xFF37474F))
 val GradientDusk = listOf(Color(0xFF37474F), Color(0xFF455A64))
 val GradientNavy = listOf(Color(0xFF1A237E), Color(0xFF283593))
 val GradientDarkTeal = listOf(Color(0xFF004D40), Color(0xFF00695C))
+val GradientPurple = listOf(Color(0xFF512DA8), Color(0xFF673AB7)) // Purple gradient for Test Drive
