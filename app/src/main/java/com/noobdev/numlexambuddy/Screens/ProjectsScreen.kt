@@ -434,12 +434,11 @@ fun ProjectsScreen(
                         LazyColumn(
                             verticalArrangement = Arrangement.spacedBy(12.dp),
                             modifier = Modifier.fillMaxWidth()
-                        ) {
-                            items(filteredProjects) { project ->
+                        ) {                            items(filteredProjects) { project ->
                                 ProjectCard(
                                     project = project,
                                     onDownloadClick = { 
-                                        // Handle download action
+                                        viewModel.downloadProject(project)
                                     }
                                 )
                             }
