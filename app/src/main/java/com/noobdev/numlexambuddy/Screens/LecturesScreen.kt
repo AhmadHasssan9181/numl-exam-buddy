@@ -47,6 +47,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import com.noobdev.numlexambuddy.viewmodel.LecturesViewModel
 import com.noobdev.numlexambuddy.viewmodel.LecturesViewModelFactory
 import com.noobdev.numlexambuddy.model.Department
+import com.noobdev.numlexambuddy.model.Lecture
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -6,7 +6,7 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.noobdev.numlexambuddy.Screens.Lecture
+import com.noobdev.numlexambuddy.model.Lecture
 import com.noobdev.numlexambuddy.data.DriveServiceManager
 import com.noobdev.numlexambuddy.data.LecturesRepository
 import kotlinx.coroutines.flow.MutableStateFlow
