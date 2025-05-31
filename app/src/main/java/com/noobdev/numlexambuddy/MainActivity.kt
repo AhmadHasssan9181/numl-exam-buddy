@@ -24,7 +24,6 @@ import com.noobdev.numlexambuddy.Screens.PastPapersScreen
 import com.noobdev.numlexambuddy.Screens.LecturesScreen
 import com.noobdev.numlexambuddy.Screens.StudyMaterialScreen
 import com.noobdev.numlexambuddy.Screens.ProjectsScreen
-import com.noobdev.numlexambuddy.Screens.TestDriveScreen
 import com.noobdev.numlexambuddy.navigation.NavRoutes
 import com.noobdev.numlexambuddy.ui.theme.NumlExamBuddyTheme
 
@@ -73,16 +72,16 @@ fun AppNavHost(
                 },
                 onNavigateToStudyMaterial = {
                     navController.navigate(NavRoutes.STUDY_MATERIAL)
-                },
-                onNavigateToProjects = {
+                },                onNavigateToProjects = {
                     navController.navigate(NavRoutes.PROJECTS)
                 },
-                onNavigateToTestDrive = {
-                    navController.navigate(NavRoutes.TEST_DRIVE)
+                onNavigateToDocuments = {
+                    navController.navigate(NavRoutes.STUDY_MATERIAL) // For now, point to Study Material
                 }
             )
         }
-    composable(NavRoutes.PAST_PAPERS) {
+        
+        composable(NavRoutes.PAST_PAPERS) {
             // Implement back button handling for system navigation 
             BackHandler {
                 navController.popBackStack()
@@ -116,8 +115,7 @@ fun AppNavHost(
                 onBackClick = {
                     navController.popBackStack()
                 }
-            )
-        }
+            )        }
         
         composable(NavRoutes.PROJECTS) {
             BackHandler {
@@ -126,18 +124,6 @@ fun AppNavHost(
             
             ProjectsScreen(
                 onBackClick = {
-                    navController.popBackStack()
-                }
-            )
-        }
-        composable(NavRoutes.TEST_DRIVE) {
-            // Implement back button handling
-            BackHandler {
-                navController.popBackStack()
-            }
-            
-            TestDriveScreen(
-                onBack = {
                     navController.popBackStack()
                 }
             )

@@ -9,6 +9,5 @@ object NavRoutes {
     const val LECTURES = "lectures"
     const val STUDY_MATERIAL = "study_material"
     const val PROJECTS = "projects"
-    const val TEST_DRIVE = "test_drive"
     // Add more routes as needed for other features
 }

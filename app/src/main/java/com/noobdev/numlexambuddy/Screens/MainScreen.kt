@@ -68,7 +68,7 @@ fun MainScreen(
     onNavigateToLectures: () -> Unit = {},
     onNavigateToStudyMaterial: () -> Unit = {},
     onNavigateToProjects: () -> Unit = {},
-    onNavigateToTestDrive: () -> Unit = {}
+    onNavigateToDocuments: () -> Unit = {}
 ) {
     // Coroutine scope for animations
     val scope = rememberCoroutineScope()
@@ -107,19 +107,12 @@ fun MainScreen(
     }
 
     // Feature items definition with more subtle gradients and professional icons
-    val featureItems = remember {
-        listOf(
+    val featureItems = remember {        listOf(
             FeatureItem(
                 "Past Papers",
                 Icons.Outlined.Description,
                 GradientMonochrome,
                 "Access previous exam papers"
-            ),
-            FeatureItem(
-                "Test Drive API",
-                Icons.Outlined.Dns,
-                GradientPurple,
-                "Test Google Drive connection"
             ),
             FeatureItem(
                 "Lectures",
@@ -138,35 +131,6 @@ fun MainScreen(
                 GradientTeal,
                 "Browse student projects"
             ),
-            FeatureItem(
-                "Upload Papers",
-                Icons.Outlined.Upload,
-                GradientDarkTeal,
-                "Share papers with others"
-            ),
-            FeatureItem(
-                "Prof Reviews",
-                Icons.Outlined.RateReview,
-                GradientCharcoal,
-                "Read and write professor reviews"
-            ),            FeatureItem(
-                "Add Documents",
-                Icons.AutoMirrored.Outlined.NoteAdd,
-                GradientGray,
-                "Contribute study documents"
-            ),
-            FeatureItem(
-                "Feedback",
-                Icons.Outlined.Feedback,
-                GradientDusk,
-                "Share your suggestions"
-            ),
-            FeatureItem(
-                "AI Help",
-                Icons.Outlined.Psychology,
-                GradientNavy,
-                "Get AI assistance with your studies"
-            )
         )
     }
 
@@ -277,14 +241,13 @@ fun MainScreen(
                                 .height(500.dp) // Fixed height for proper preview
                         ) {
                             items(featureItems.take(visibleItems)) { item ->                                FeatureCard(
-                                    feature = item,
-                                    onClick = {
+                                    feature = item,                                    onClick = {
                                         when(item.title) {
                                             "Past Papers" -> onNavigateToPastPapers()
                                             "Lectures" -> onNavigateToLectures()
                                             "Study Material" -> onNavigateToStudyMaterial()
                                             "Projects" -> onNavigateToProjects()
-                                            "Test Drive API" -> onNavigateToTestDrive()
+                                            "Documents" -> onNavigateToDocuments()
                                             // Add other navigation routes as they are implemented
                                         }
                                     }
