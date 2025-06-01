@@ -151,12 +151,11 @@ fun MainScreen(
                 ) {
                     items(recommendedResources.size) { index ->
                         ResourceCard(
-                            resource = recommendedResources[index],
-                            onClick = {
+                            resource = recommendedResources[index],                            onClick = {
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 when(recommendedResources[index].title) {
                                     "Past Papers" -> onNavigateToPastPapers()
-                                    "Video Lectures" -> onNavigateToLectures()
+                                    "Lectures" -> onNavigateToLectures()
                                     "Study Notes" -> onNavigateToStudyMaterial()
                                     "Projects Hub" -> onNavigateToProjects()
                                 }

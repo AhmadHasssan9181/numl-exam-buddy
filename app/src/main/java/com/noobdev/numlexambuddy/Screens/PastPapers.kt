@@ -108,7 +108,6 @@ fun PastPapersScreen(
     val error by viewModel.error.collectAsState()
 
     val semArray = listOf(1, 2, 3, 4, 5, 6, 7, 8)
-
     val filteredPapers = remember(papers, searchQuery, selectedDepartment, selectedSemester, selectedSubject) {
         papers.filter { paper ->
             val matchesSearch = searchQuery.isEmpty() ||
@@ -125,102 +124,116 @@ fun PastPapersScreen(
             matchesSearch && matchesDepartment && matchesSemester && matchesSubject
         }
     }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(backgroundGray)
-    ) {
-        // Header section
-        HeaderSection(
-            primaryColor = primaryColor,
-            onBack = onBack,
-            onSearch = { searchExpanded = !searchExpanded }
-        )
-
-        // Main content with scroll
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        bottomBar = {
+            BottomNavBar(
+                currentRoute = "past_papers",
+                onNavigateToMain = onNavigateToMain,
+                onNavigateToLectures = onNavigateToLectures,
+                onNavigateToStudyMaterial = onNavigateToStudyMaterial,
+                onNavigateToPastPapers = { /* Already on PastPapers */ }
+            )
+        },
+        containerColor = backgroundGray
+    ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(bottom = 80.dp) // Space for bottom nav
+                .padding(paddingValues)
         ) {
-            Spacer(modifier = Modifier.height(8.dp))
-
-        // Search section
-        AnimatedVisibility(
-            visible = searchExpanded,
-            enter = expandVertically() + fadeIn()
-        ) {
-            SearchSection(
-                searchQuery = searchQuery,
-                onSearchChange = { searchQuery = it },
-                onClose = { searchExpanded = false },
-                resultCount = filteredPapers.size,
-                accentColor = accentColor,
-                textColor = textPrimaryColor
+            // Header section
+            HeaderSection(
+                primaryColor = primaryColor,
+                onBack = onBack,
+                onSearch = { searchExpanded = !searchExpanded }
             )
-        }
 
-        // Filters section
-        FiltersSection(
-            departments = departments,
-            selectedDepartment = selectedDepartment,
-            selectedSemester = selectedSemester,
-            selectedSubject = selectedSubject,
-            subjects = subjects,
-            onDepartmentSelect = { dept ->
-                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                selectedDepartment = if (selectedDepartment == dept) null else dept
-                if (selectedDepartment != null) {
-                    viewModel.selectDegree(selectedDepartment!!.code)
-                }
-                selectedSemester = null
-                selectedSubject = null
-            },
-            onSemesterSelect = { sem ->
-                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                selectedSemester = if (selectedSemester == sem) null else sem
-                if (selectedDepartment != null && selectedSemester != null) {
-                    viewModel.selectSemester(selectedDepartment!!.code, selectedSemester!!)
-                }
-                selectedSubject = null
-            },
-            onSubjectSelect = { subj ->
-                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                selectedSubject = if (selectedSubject == subj) null else subj
-                if (selectedDepartment != null && selectedSemester != null && selectedSubject != null) {
-                    viewModel.selectSubject(selectedDepartment!!.code, selectedSemester!!, selectedSubject!!)
-                }
-            },
-            primaryColor = primaryColor,
-            accentColor = accentColor,
-            cardBackgroundColor = cardBackgroundColor,
-            surfaceVariantColor = surfaceVariantColor,
-            textColor = textPrimaryColor
-        )
+            // Main content with scroll
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+            ) {
+                Spacer(modifier = Modifier.height(8.dp))
 
-        Spacer(modifier = Modifier.height(16.dp))        // Results section
-        ResultsSection(
-            loading = loading,
-            error = error,
-            papers = filteredPapers,
-            selectedDepartment = selectedDepartment,
-            selectedSemester = selectedSemester,
-            selectedSubject = selectedSubject,
-            searchQuery = searchQuery,
-            onPaperDownload = { paper ->
-                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                viewModel.downloadPaper(paper)
-            },
-            onClearError = { viewModel.clearError() },
-            primaryColor = primaryColor,
-            accentColor = accentColor,
-            errorColor = errorColor,
-            onErrorColor = onErrorColor,
-            surfaceVariantColor = surfaceVariantColor,
-            textColor = textPrimaryColor
-        )
+                // Search section
+                AnimatedVisibility(
+                    visible = searchExpanded,
+                    enter = expandVertically() + fadeIn()
+                ) {
+                    SearchSection(
+                        searchQuery = searchQuery,
+                        onSearchChange = { searchQuery = it },
+                        onClose = { searchExpanded = false },
+                        resultCount = filteredPapers.size,
+                        accentColor = accentColor,
+                        textColor = textPrimaryColor
+                    )
+                }
+
+                // Filters section
+                FiltersSection(
+                    departments = departments,
+                    selectedDepartment = selectedDepartment,
+                    selectedSemester = selectedSemester,
+                    selectedSubject = selectedSubject,
+                    subjects = subjects,
+                    onDepartmentSelect = { dept ->
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        selectedDepartment = if (selectedDepartment == dept) null else dept
+                        if (selectedDepartment != null) {
+                            viewModel.selectDegree(selectedDepartment!!.code)
+                        }
+                        selectedSemester = null
+                        selectedSubject = null
+                    },
+                    onSemesterSelect = { sem ->
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        selectedSemester = if (selectedSemester == sem) null else sem
+                        if (selectedDepartment != null && selectedSemester != null) {
+                            viewModel.selectSemester(selectedDepartment!!.code, selectedSemester!!)
+                        }
+                        selectedSubject = null
+                    },
+                    onSubjectSelect = { subj ->
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        selectedSubject = if (selectedSubject == subj) null else subj
+                        if (selectedDepartment != null && selectedSemester != null && selectedSubject != null) {
+                            viewModel.selectSubject(selectedDepartment!!.code, selectedSemester!!, selectedSubject!!)
+                        }
+                    },
+                    primaryColor = primaryColor,
+                    accentColor = accentColor,
+                    cardBackgroundColor = cardBackgroundColor,
+                    surfaceVariantColor = surfaceVariantColor,
+                    textColor = textPrimaryColor
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                // Results section
+                ResultsSection(
+                    loading = loading,
+                    error = error,
+                    papers = filteredPapers,
+                    selectedDepartment = selectedDepartment,
+                    selectedSemester = selectedSemester,
+                    selectedSubject = selectedSubject,
+                    searchQuery = searchQuery,
+                    onPaperDownload = { paper ->
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        viewModel.downloadPaper(paper)
+                    },
+                    onClearError = { viewModel.clearError() },
+                    primaryColor = primaryColor,
+                    accentColor = accentColor,
+                    errorColor = errorColor,
+                    onErrorColor = onErrorColor,
+                    surfaceVariantColor = surfaceVariantColor,
+                    textColor = textPrimaryColor
+                )
+            }
         }
     }
 }
