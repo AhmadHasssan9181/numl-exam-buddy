@@ -45,6 +45,7 @@ import com.noobdev.numlexambuddy.viewmodel.ViewModelFactory
 import com.noobdev.numlexambuddy.model.Department
 import com.noobdev.numlexambuddy.model.StudyMaterial
 import com.noobdev.numlexambuddy.components.BottomNavBar
+import com.noobdev.numlexambuddy.ui.theme.customColors
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -58,12 +59,12 @@ fun StudyMaterialScreen(
     onNavigateToPastPapers: () -> Unit = {},
     onNavigateToLectures: () -> Unit = {}
 ) {
-    // Color definitions matching MainScreen
-    val primaryColor = Color(0xFF1E88E5) // Vibrant blue
-    val accentColor = Color(0xFFFF9800) // Orange
-    val backgroundGray = Color(0xFFF5F5F5) // Light gray background
-    val cardBackgroundColor = Color(0xFFE8F5E9) // Light green background
-    val textPrimaryColor = Color(0xFF212121) // Dark text
+    // Use theme colors instead of hardcoded colors
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val accentColor = MaterialTheme.customColors.accentAmber
+    val backgroundGray = MaterialTheme.colorScheme.background
+    val cardBackgroundColor = MaterialTheme.colorScheme.surfaceVariant
+    val textPrimaryColor = MaterialTheme.colorScheme.onBackground
 
     val haptic = LocalHapticFeedback.current
 
@@ -137,14 +138,13 @@ fun StudyMaterialScreen(
                 onNavigateToStudyMaterial = { /* Already on study material */ }
             )
         }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .background(backgroundGray)
-                .verticalScroll(rememberScrollState())
-        ) {
+    ) { paddingValues ->        Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(paddingValues)
+            .background(MaterialTheme.colorScheme.background)
+            .verticalScroll(rememberScrollState())
+    ) {
         // Header section matching MainScreen style
         StudyMaterialHeaderSection(
             primaryColor = primaryColor,
@@ -218,7 +218,7 @@ fun StudyMaterialScreen(
             accentColor = accentColor,
             textColor = textPrimaryColor
         )
-        }
+    }
     }
 }
 
@@ -227,7 +227,7 @@ fun StudyMaterialScreen(
  */
 @Composable
 fun StudyMaterialHeaderSection(
-    primaryColor: Color,
+    primaryColor: Color = MaterialTheme.colorScheme.primary,
     onBack: () -> Unit,
     onSearch: () -> Unit
 ) {
@@ -255,7 +255,7 @@ fun StudyMaterialHeaderSection(
                         .size(40.dp)
                         .clickable { onBack() },
                     shape = CircleShape,
-                    color = Color.White.copy(alpha = 0.9f)
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
@@ -273,7 +273,7 @@ fun StudyMaterialHeaderSection(
                         .size(40.dp)
                         .clickable { onSearch() },
                     shape = CircleShape,
-                    color = Color.White.copy(alpha = 0.9f)
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
@@ -293,7 +293,7 @@ fun StudyMaterialHeaderSection(
                 text = "📚 Study Materials",
                 style = MaterialTheme.typography.headlineSmall.copy(
                     fontWeight = FontWeight.Bold,
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onPrimary,
                     fontSize = 20.sp,
                     lineHeight = 26.sp
                 )
@@ -302,7 +302,7 @@ fun StudyMaterialHeaderSection(
             Text(
                 text = "Comprehensive study resources and notes",
                 style = MaterialTheme.typography.bodyMedium.copy(
-                    color = Color.White.copy(alpha = 0.9f)
+                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f)
                 ),
                 modifier = Modifier.padding(top = 4.dp)
             )
@@ -322,15 +322,15 @@ fun StudyMaterialSearchSection(
     onSearchChange: (String) -> Unit,
     onClose: () -> Unit,
     resultCount: Int,
-    accentColor: Color,
-    textColor: Color
+    accentColor: Color = MaterialTheme.customColors.accentAmber,
+    textColor: Color = MaterialTheme.colorScheme.onBackground
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
@@ -402,14 +402,14 @@ fun StudyMaterialSearchSection(
                 Surface(
                     shape = RoundedCornerShape(8.dp),
                     color = if (resultCount > 0) accentColor.copy(alpha = 0.15f)
-                    else Color.Red.copy(alpha = 0.15f)
+                    else MaterialTheme.colorScheme.error.copy(alpha = 0.15f)
                 ) {
                     Text(
                         text = if (resultCount > 0) "📖 Found $resultCount materials"
                         else "❌ No materials found",
                         style = MaterialTheme.typography.labelMedium.copy(
                             fontWeight = FontWeight.SemiBold,
-                            color = if (resultCount > 0) accentColor else Color.Red
+                            color = if (resultCount > 0) accentColor else MaterialTheme.colorScheme.error
                         ),
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                     )
@@ -433,17 +433,17 @@ fun StudyMaterialFiltersSection(
     onDepartmentSelect: (Department) -> Unit,
     onSemesterSelect: (Int) -> Unit,
     onSubjectSelect: (String) -> Unit,
-    primaryColor: Color,
-    accentColor: Color,
-    cardBackgroundColor: Color,
-    textColor: Color
+    primaryColor: Color = MaterialTheme.colorScheme.primary,
+    accentColor: Color = MaterialTheme.customColors.accentAmber,
+    cardBackgroundColor: Color = MaterialTheme.colorScheme.surfaceVariant,
+    textColor: Color = MaterialTheme.colorScheme.onBackground
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
@@ -559,8 +559,8 @@ fun StudyMaterialFiltersSection(
 fun StudyMaterialFilterCategory(
     title: String,
     isSelected: Boolean,
-    textColor: Color,
-    accentColor: Color,
+    textColor: Color = MaterialTheme.colorScheme.onBackground,
+    accentColor: Color = MaterialTheme.customColors.accentAmber,
     content: @Composable () -> Unit
 ) {
     Column {
@@ -608,9 +608,9 @@ fun StudyMaterialResultsSection(
     selectedSemester: Int?,
     selectedSubject: String?,
     onMaterialDownload: (StudyMaterial) -> Unit,
-    primaryColor: Color,
-    accentColor: Color,
-    textColor: Color
+    primaryColor: Color = MaterialTheme.colorScheme.primary,
+    accentColor: Color = MaterialTheme.customColors.accentAmber,
+    textColor: Color = MaterialTheme.colorScheme.onBackground
 ) {
     Column(
         modifier = Modifier
@@ -646,11 +646,14 @@ fun StudyMaterialResultsSection(
  * Loading state with MainScreen styling
  */
 @Composable
-fun StudyMaterialLoadingState(primaryColor: Color, textColor: Color) {
+fun StudyMaterialLoadingState(
+    primaryColor: Color = MaterialTheme.colorScheme.primary,
+    textColor: Color = MaterialTheme.colorScheme.onBackground
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
@@ -688,11 +691,14 @@ fun StudyMaterialLoadingState(primaryColor: Color, textColor: Color) {
  * Error state with MainScreen styling
  */
 @Composable
-fun StudyMaterialErrorState(error: String, textColor: Color) {
+fun StudyMaterialErrorState(
+    error: String,
+    textColor: Color = MaterialTheme.colorScheme.onBackground
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
@@ -704,7 +710,7 @@ fun StudyMaterialErrorState(error: String, textColor: Color) {
             Icon(
                 Icons.Rounded.ErrorOutline,
                 contentDescription = null,
-                tint = Color.Red,
+                tint = MaterialTheme.colorScheme.error,
                 modifier = Modifier.size(48.dp)
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -712,7 +718,7 @@ fun StudyMaterialErrorState(error: String, textColor: Color) {
                 text = "Something Went Wrong",
                 style = MaterialTheme.typography.titleMedium.copy(
                     fontWeight = FontWeight.Bold,
-                    color = Color.Red
+                    color = MaterialTheme.colorScheme.error
                 )
             )
             Text(
@@ -731,11 +737,14 @@ fun StudyMaterialErrorState(error: String, textColor: Color) {
  * Empty state with MainScreen styling
  */
 @Composable
-fun StudyMaterialEmptyState(primaryColor: Color, textColor: Color) {
+fun StudyMaterialEmptyState(
+    primaryColor: Color = MaterialTheme.colorScheme.primary,
+    textColor: Color = MaterialTheme.colorScheme.onBackground
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
@@ -774,11 +783,14 @@ fun StudyMaterialEmptyState(primaryColor: Color, textColor: Color) {
  * Welcome state with MainScreen styling
  */
 @Composable
-fun StudyMaterialWelcomeState(primaryColor: Color, textColor: Color) {
+fun StudyMaterialWelcomeState(
+    primaryColor: Color = MaterialTheme.colorScheme.primary,
+    textColor: Color = MaterialTheme.colorScheme.onBackground
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
@@ -820,14 +832,14 @@ fun StudyMaterialWelcomeState(primaryColor: Color, textColor: Color) {
 fun StudyMaterialsList(
     materials: List<StudyMaterial>,
     onDownload: (StudyMaterial) -> Unit,
-    accentColor: Color,
-    textColor: Color
+    accentColor: Color = MaterialTheme.customColors.accentAmber,
+    textColor: Color = MaterialTheme.colorScheme.onBackground
 ) {
     // Results header
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Row(
@@ -902,8 +914,8 @@ fun StudyMaterialsList(
 fun StudyMaterialCard(
     material: StudyMaterial,
     onDownloadClick: () -> Unit,
-    accentColor: Color,
-    textColor: Color
+    accentColor: Color = MaterialTheme.customColors.accentAmber,
+    textColor: Color = MaterialTheme.colorScheme.onBackground
 ) {
     var isAnimated by remember { mutableStateOf(false) }
     val scale by animateFloatAsState(
@@ -925,7 +937,7 @@ fun StudyMaterialCard(
             .scale(scale)
             .clickable { onDownloadClick() },
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
@@ -977,20 +989,19 @@ fun StudyMaterialCard(
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
+            ) {                Surface(
+                shape = RoundedCornerShape(8.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
             ) {
-                Surface(
-                    shape = RoundedCornerShape(8.dp),
-                    color = Color.Gray.copy(alpha = 0.1f)
-                ) {
-                    Text(
-                        text = "${material.type} • Semester ${material.semester}",
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            fontWeight = FontWeight.Medium,
-                            color = textColor.copy(alpha = 0.8f)
-                        ),
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                    )
-                }
+                Text(
+                    text = "${material.type} • Semester ${material.semester}",
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontWeight = FontWeight.Medium,
+                        color = textColor.copy(alpha = 0.8f)
+                    ),
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                )
+            }
                 if (material.size.isNotEmpty()) {
                     Text(
                         text = material.size,
@@ -1013,10 +1024,10 @@ fun StudyMaterialDepartmentChip(
     department: Department,
     isSelected: Boolean,
     onClick: () -> Unit,
-    primaryColor: Color,
-    accentColor: Color,
-    cardBackgroundColor: Color,
-    textColor: Color
+    primaryColor: Color = MaterialTheme.colorScheme.primary,
+    accentColor: Color = MaterialTheme.customColors.accentAmber,
+    cardBackgroundColor: Color = MaterialTheme.colorScheme.surfaceVariant,
+    textColor: Color = MaterialTheme.colorScheme.onBackground
 ) {
     val scale by animateFloatAsState(
         targetValue = if (isSelected) 1.05f else 1f,
@@ -1031,7 +1042,7 @@ fun StudyMaterialDepartmentChip(
             .clickable { onClick() },
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) cardBackgroundColor else Color.White
+            containerColor = if (isSelected) cardBackgroundColor else MaterialTheme.colorScheme.surface
         ),
         elevation = CardDefaults.cardElevation(
             defaultElevation = if (isSelected) 6.dp else 2.dp
@@ -1044,20 +1055,19 @@ fun StudyMaterialDepartmentChip(
                 .padding(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
+        ) {            Surface(
+            shape = RoundedCornerShape(8.dp),
+            color = if (isSelected) accentColor.copy(alpha = 0.2f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
         ) {
-            Surface(
-                shape = RoundedCornerShape(8.dp),
-                color = if (isSelected) accentColor.copy(alpha = 0.2f) else Color.Gray.copy(alpha = 0.1f)
-            ) {
-                Text(
-                    text = department.code,
-                    style = MaterialTheme.typography.labelMedium.copy(
-                        fontWeight = FontWeight.Bold,
-                        color = if (isSelected) accentColor else textColor
-                    ),
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                )
-            }
+            Text(
+                text = department.code,
+                style = MaterialTheme.typography.labelMedium.copy(
+                    fontWeight = FontWeight.Bold,
+                    color = if (isSelected) accentColor else textColor
+                ),
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+            )
+        }
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = department.name,
@@ -1082,9 +1092,9 @@ fun StudyMaterialSemesterChip(
     semester: Int,
     isSelected: Boolean,
     onClick: () -> Unit,
-    primaryColor: Color,
-    accentColor: Color,
-    textColor: Color
+    primaryColor: Color = MaterialTheme.colorScheme.primary,
+    accentColor: Color = MaterialTheme.customColors.accentAmber,
+    textColor: Color = MaterialTheme.colorScheme.onBackground
 ) {
     val scale by animateFloatAsState(
         targetValue = if (isSelected) 1.1f else 1f,
@@ -1096,24 +1106,23 @@ fun StudyMaterialSemesterChip(
             .size(48.dp)
             .scale(scale)
             .background(
-                color = if (isSelected) accentColor else Color.Gray.copy(alpha = 0.2f),
+                color = if (isSelected) accentColor else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f),
                 shape = CircleShape
             )
             .border(
                 width = if (isSelected) 0.dp else 1.dp,
-                color = if (isSelected) Color.Transparent else Color.Gray.copy(alpha = 0.3f),
+                color = if (isSelected) Color.Transparent else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
                 shape = CircleShape
             )
             .clickable { onClick() },
         contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = "$semester",
-            style = MaterialTheme.typography.titleMedium.copy(
-                fontWeight = FontWeight.Bold,
-                color = if (isSelected) Color.White else textColor
-            )
+    ) {        Text(
+        text = "$semester",
+        style = MaterialTheme.typography.titleMedium.copy(
+            fontWeight = FontWeight.Bold,
+            color = if (isSelected) MaterialTheme.colorScheme.surface else textColor
         )
+    )
     }
 }
 
@@ -1125,8 +1134,8 @@ fun StudyMaterialSubjectChip(
     subject: String,
     isSelected: Boolean,
     onClick: () -> Unit,
-    accentColor: Color,
-    textColor: Color
+    accentColor: Color = MaterialTheme.customColors.accentAmber,
+    textColor: Color = MaterialTheme.colorScheme.onBackground
 ) {
     val scale by animateFloatAsState(
         targetValue = if (isSelected) 1.05f else 1f,
@@ -1138,7 +1147,7 @@ fun StudyMaterialSubjectChip(
             .scale(scale)
             .clickable { onClick() },
         shape = RoundedCornerShape(20.dp),
-        color = if (isSelected) accentColor.copy(alpha = 0.2f) else Color.Gray.copy(alpha = 0.1f),
+        color = if (isSelected) accentColor.copy(alpha = 0.2f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
         border = if (isSelected) androidx.compose.foundation.BorderStroke(1.dp, accentColor.copy(alpha = 0.5f)) else null
     ) {
         Row(
