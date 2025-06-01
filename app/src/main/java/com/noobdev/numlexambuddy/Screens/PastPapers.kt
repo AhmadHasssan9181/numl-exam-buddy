@@ -1,5 +1,7 @@
 package com.noobdev.numlexambuddy.Screens
 
+import android.R.attr.onClick
+import android.R.attr.text
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
@@ -68,43 +70,45 @@ fun PastPapersScreen(
     onNavigateToMain: () -> Unit = {},
     onNavigateToLectures: () -> Unit = {},
     onNavigateToStudyMaterial: () -> Unit = {}
-) {
-    // Color definitions matching MainScreen
-    val primaryColor = Color(0xFF1E88E5) // Vibrant blue
-    val accentColor = Color(0xFFFF9800) // Orange
-    val backgroundGray = Color(0xFFF5F5F5) // Light gray background
-    val cardBackgroundColor = Color(0xFFE8F5E9) // Light green background
-    val textPrimaryColor = Color(0xFF212121) // Dark text
+) {// Theme color definitions using MaterialTheme for consistency
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val accentColor = MaterialTheme.customColors.accentAmber
+    val backgroundGray = MaterialTheme.colorScheme.background
+    val cardBackgroundColor = MaterialTheme.colorScheme.surface
+    val surfaceVariantColor = MaterialTheme.colorScheme.surfaceVariant
+    val textPrimaryColor = MaterialTheme.colorScheme.onBackground
+    val textSecondaryColor = MaterialTheme.colorScheme.onSurfaceVariant
+    val surfaceColor = MaterialTheme.colorScheme.surface
+    val errorColor = MaterialTheme.colorScheme.error
+    val onErrorColor = MaterialTheme.colorScheme.onError
 
-    // Animation states
-    var searchExpanded by remember { mutableStateOf(false) }
+    // Haptic feedback for better UX
     val haptic = LocalHapticFeedback.current
 
-    // Sample departments
-    val departments = remember {
-        listOf(
-            Department("Computer Science", "BSCS"),
-            Department("Artificial Intelligence", "BSAI"),
-            Department("Information Technology", "BSIT"),
-            Department("Software Engineering", "BSSE"),
-            Department("Cyber Security", "BSCY"),
-            Department("Data Science", "BSDS")
-        )
-    }
+    // Search expanded state
+    var searchExpanded by remember { mutableStateOf(false) }
 
-    // Filter states
+    val departments = listOf(
+        Department("Computer Science", "BSCS"),
+        Department("Artificial Intelligence", "BSAI"),
+        Department("Information Technology", "BSIT"),
+        Department("Software Engineering", "BSSE"),
+        Department("Associate Degree in Computing", "ADC")
+    )
+
     var selectedDepartment by remember { mutableStateOf<Department?>(null) }
     var selectedSemester by remember { mutableStateOf<Int?>(null) }
     var selectedSubject by remember { mutableStateOf<String?>(null) }
     var searchQuery by remember { mutableStateOf("") }
+    var isSearchActive by remember { mutableStateOf(false) }
 
-    // ViewModel states
     val subjects by viewModel.subjects.collectAsState()
     val papers by viewModel.papers.collectAsState()
     val loading by viewModel.loading.collectAsState()
     val error by viewModel.error.collectAsState()
 
-    // Enhanced paper filtering
+    val semArray = listOf(1, 2, 3, 4, 5, 6, 7, 8)
+
     val filteredPapers = remember(papers, searchQuery, selectedDepartment, selectedSemester, selectedSubject) {
         papers.filter { paper ->
             val matchesSearch = searchQuery.isEmpty() ||
@@ -118,38 +122,30 @@ fun PastPapersScreen(
             val matchesSubject = selectedSubject == null ||
                     paper.subject == selectedSubject
 
-            matchesSearch && matchesDepartment && matchesSemester && matchesSubject        }
+            matchesSearch && matchesDepartment && matchesSemester && matchesSubject
+        }
     }
 
-    Scaffold(
-        bottomBar = {
-            BottomNavBar(
-                currentRoute = "past_papers",
-                onNavigateToMain = onNavigateToMain,
-                onNavigateToPastPapers = { /* Already on past papers */ },
-                onNavigateToLectures = onNavigateToLectures,
-                onNavigateToStudyMaterial = onNavigateToStudyMaterial
-            )
-        }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .background(backgroundGray)
-                .verticalScroll(rememberScrollState())
-        ) {
-        // Header section matching MainScreen style
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(backgroundGray)
+    ) {
+        // Header section
         HeaderSection(
             primaryColor = primaryColor,
             onBack = onBack,
-            onSearch = {
-                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                searchExpanded = !searchExpanded
-            }
+            onSearch = { searchExpanded = !searchExpanded }
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        // Main content with scroll
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(bottom = 80.dp) // Space for bottom nav
+        ) {
+            Spacer(modifier = Modifier.height(8.dp))
 
         // Search section
         AnimatedVisibility(
@@ -200,12 +196,11 @@ fun PastPapersScreen(
             primaryColor = primaryColor,
             accentColor = accentColor,
             cardBackgroundColor = cardBackgroundColor,
+            surfaceVariantColor = surfaceVariantColor,
             textColor = textPrimaryColor
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Results section
+        Spacer(modifier = Modifier.height(16.dp))        // Results section
         ResultsSection(
             loading = loading,
             error = error,
@@ -218,8 +213,12 @@ fun PastPapersScreen(
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 viewModel.downloadPaper(paper)
             },
-            onClearError = { viewModel.clearError() },            primaryColor = primaryColor,
+            onClearError = { viewModel.clearError() },
+            primaryColor = primaryColor,
             accentColor = accentColor,
+            errorColor = errorColor,
+            onErrorColor = onErrorColor,
+            surfaceVariantColor = surfaceVariantColor,
             textColor = textPrimaryColor
         )
         }
@@ -334,7 +333,7 @@ fun SearchSection(
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
@@ -344,8 +343,7 @@ fun SearchSection(
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+                verticalAlignment = Alignment.CenterVertically        ) {
                 OutlinedTextField(
                     value = searchQuery,
                     onValueChange = onSearchChange,
@@ -378,17 +376,18 @@ fun SearchSection(
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = accentColor,
-                        unfocusedBorderColor = Color.Gray.copy(alpha = 0.3f)
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                        focusedTextColor = textColor,
+                        unfocusedTextColor = textColor
                     )
                 )
 
                 Spacer(modifier = Modifier.width(8.dp))
-
                 IconButton(
                     onClick = onClose,
                     modifier = Modifier
                         .background(
-                            Color.Gray.copy(alpha = 0.1f),
+                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
                             CircleShape
                         )
                 ) {
@@ -406,14 +405,14 @@ fun SearchSection(
                 Surface(
                     shape = RoundedCornerShape(8.dp),
                     color = if (resultCount > 0) accentColor.copy(alpha = 0.15f)
-                    else Color.Red.copy(alpha = 0.15f)
+                    else MaterialTheme.colorScheme.error.copy(alpha = 0.15f)
                 ) {
                     Text(
                         text = if (resultCount > 0) "📋 Found $resultCount papers"
                         else "❌ No papers found",
                         style = MaterialTheme.typography.labelMedium.copy(
                             fontWeight = FontWeight.SemiBold,
-                            color = if (resultCount > 0) accentColor else Color.Red
+                            color = if (resultCount > 0) accentColor else MaterialTheme.colorScheme.error
                         ),
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                     )
@@ -439,14 +438,14 @@ fun FiltersSection(
     primaryColor: Color,
     accentColor: Color,
     cardBackgroundColor: Color,
+    surfaceVariantColor: Color,
     textColor: Color
-) {
-    Card(
+) {Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
@@ -490,10 +489,10 @@ fun FiltersSection(
                         DepartmentChip(
                             department = department,
                             selected = department == selectedDepartment,
-                            onSelect = { onDepartmentSelect(department) },
-                            primaryColor = primaryColor,
+                            onSelect = { onDepartmentSelect(department) },                            primaryColor = primaryColor,
                             accentColor = accentColor,
                             cardBackgroundColor = cardBackgroundColor,
+                            surfaceVariantColor = surfaceVariantColor,
                             textColor = textColor
                         )
                     }
@@ -538,13 +537,13 @@ fun FiltersSection(
                     LazyRow(
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                         contentPadding = PaddingValues(vertical = 8.dp)
-                    ) {
-                        items(subjects) { subject ->
+                    ) {                        items(subjects) { subject ->
                             SubjectChip(
                                 subject = subject,
                                 selected = subject == selectedSubject,
                                 onSelect = { onSubjectSelect(subject) },
                                 accentColor = accentColor,
+                                surfaceVariantColor = surfaceVariantColor,
                                 textColor = textColor
                             )
                         }
@@ -593,11 +592,12 @@ fun FilterCategory(
                             .padding(2.dp)
                     )
                 }
+                }
             }
         }
         content()
     }
-}
+
 
 /**
  * Department chip with MainScreen styling
@@ -610,6 +610,7 @@ fun DepartmentChip(
     primaryColor: Color,
     accentColor: Color,
     cardBackgroundColor: Color,
+    surfaceVariantColor: Color,
     textColor: Color
 ) {
     Card(
@@ -619,7 +620,7 @@ fun DepartmentChip(
             .clickable { onSelect() },
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (selected) cardBackgroundColor else Color.White
+            containerColor = if (selected) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.surface
         ),
         elevation = CardDefaults.cardElevation(
             defaultElevation = if (selected) 6.dp else 2.dp
@@ -632,10 +633,9 @@ fun DepartmentChip(
                 .padding(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
-        ) {
-            Surface(
+        ) {            Surface(
                 shape = RoundedCornerShape(8.dp),
-                color = if (selected) accentColor.copy(alpha = 0.2f) else Color.Gray.copy(alpha = 0.1f)
+                color = if (selected) accentColor.copy(alpha = 0.2f) else surfaceVariantColor.copy(alpha = 0.3f)
             ) {
                 Text(
                     text = department.code,
@@ -673,17 +673,16 @@ fun SemesterChip(
     primaryColor: Color,
     accentColor: Color,
     textColor: Color
-) {
-    Box(
+) {    Box(
         modifier = Modifier
             .size(48.dp)
             .background(
-                color = if (selected) accentColor else Color.Gray.copy(alpha = 0.2f),
+                color = if (selected) accentColor else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
                 shape = CircleShape
             )
             .border(
                 width = if (selected) 0.dp else 1.dp,
-                color = if (selected) Color.Transparent else Color.Gray.copy(alpha = 0.3f),
+                color = if (selected) Color.Transparent else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
                 shape = CircleShape
             )
             .clickable { onSelect() },
@@ -708,12 +707,13 @@ fun SubjectChip(
     selected: Boolean,
     onSelect: () -> Unit,
     accentColor: Color,
+    surfaceVariantColor: Color,
     textColor: Color
 ) {
     Surface(
         modifier = Modifier.clickable { onSelect() },
         shape = RoundedCornerShape(20.dp),
-        color = if (selected) accentColor.copy(alpha = 0.2f) else Color.Gray.copy(alpha = 0.1f),
+        color = if (selected) accentColor.copy(alpha = 0.2f) else surfaceVariantColor.copy(alpha = 0.3f),
         border = if (selected) BorderStroke(1.dp, accentColor.copy(alpha = 0.5f)) else null
     ) {
         Row(
@@ -756,7 +756,10 @@ fun ResultsSection(
     onClearError: () -> Unit,
     primaryColor: Color,
     accentColor: Color,
-    textColor: Color
+    textColor: Color,
+    errorColor: Color,
+    onErrorColor: Color,
+    surfaceVariantColor: Color
 ) {
     Column(
         modifier = Modifier
@@ -767,11 +770,12 @@ fun ResultsSection(
             loading -> {
                 LoadingState(primaryColor = primaryColor, textColor = textColor)
             }
-            error != null -> {
-                ErrorState(
+            error != null -> {                ErrorState(
                     error = error,
                     onClearError = onClearError,
-                    textColor = textColor
+                    textColor = textColor,
+                    errorColor = errorColor,
+                    onErrorColor = onErrorColor
                 )
             }
             papers.isEmpty() && (selectedDepartment != null || selectedSemester != null || selectedSubject != null || searchQuery.isNotEmpty()) -> {
@@ -800,7 +804,7 @@ fun LoadingState(primaryColor: Color, textColor: Color) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
@@ -841,24 +845,25 @@ fun LoadingState(primaryColor: Color, textColor: Color) {
 fun ErrorState(
     error: String,
     onClearError: () -> Unit,
-    textColor: Color
+    textColor: Color,
+    errorColor: Color,
+    onErrorColor: Color
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(24.dp),
-            horizontalAlignment =Alignment.CenterHorizontally
-        ) {
-            Icon(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {            Icon(
                 Icons.Rounded.ErrorOutline,
                 contentDescription = null,
-                tint = Color.Red,
+                tint = errorColor,
                 modifier = Modifier.size(48.dp)
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -866,7 +871,7 @@ fun ErrorState(
                 text = "Something Went Wrong",
                 style = MaterialTheme.typography.titleMedium.copy(
                     fontWeight = FontWeight.Bold,
-                    color = Color.Red
+                    color = errorColor
                 )
             )
             Text(
@@ -880,16 +885,23 @@ fun ErrorState(
             Button(
                 onClick = onClearError,
                 modifier = Modifier.padding(top = 16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = errorColor,
+                    contentColor = onErrorColor
+                ),
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Icon(
                     Icons.Rounded.Refresh,
                     contentDescription = null,
+                    tint = onErrorColor,
                     modifier = Modifier.size(18.dp)
                 )
                 Spacer(modifier = Modifier.width(6.dp))
-                Text("Try Again")
+                Text(
+                    "Try Again",
+                    color = onErrorColor
+                )
             }
         }
     }
@@ -903,7 +915,7 @@ fun EmptyState(primaryColor: Color, textColor: Color) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
@@ -946,7 +958,7 @@ fun WelcomeState(primaryColor: Color, textColor: Color) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
@@ -990,12 +1002,11 @@ fun PapersList(
     onDownload: (Paper) -> Unit,
     accentColor: Color,
     textColor: Color
-) {
-    // Results header
+) {    // Results header
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Row(
@@ -1072,13 +1083,12 @@ fun PaperCard(
     onDownload: () -> Unit,
     accentColor: Color,
     textColor: Color
-) {
-    Card(
+) {    Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onDownload() },
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
@@ -1129,10 +1139,9 @@ fun PaperCard(
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Surface(
+            ) {                Surface(
                     shape = RoundedCornerShape(8.dp),
-                    color = Color.Gray.copy(alpha = 0.1f)
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
                 ) {
                     Text(
                         text = "Semester ${paper.semester}",
