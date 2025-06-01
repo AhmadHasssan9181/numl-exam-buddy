@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    // Use the latest stable KSP version compatible with your Kotlin
+    id("com.google.devtools.ksp") version "1.9.23-1.0.19"
 }
 
 android {
@@ -31,15 +33,15 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    
+
     kotlinOptions {
         jvmTarget = "11"
     }
-    
+
     buildFeatures {
         compose = true
     }
-    
+
     packaging {
         resources {
             excludes += listOf(
@@ -78,8 +80,8 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation("androidx.compose.material:material-icons-extended:1.5.4")
-    
-    // Google Drive API - Single instances of each dependency
+
+    // Google Drive API
     implementation("com.google.api-client:google-api-client-android:2.8.0")
     implementation("com.google.http-client:google-http-client:1.43.3")
     implementation("com.google.apis:google-api-services-drive:v3-rev20250511-2.0.0")
@@ -89,4 +91,23 @@ dependencies {
 
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
+
+    // Room Database
+    val roomVersion = "2.6.1"
+    implementation("androidx.room:room-runtime:$roomVersion")
+    implementation("androidx.room:room-ktx:$roomVersion")
+    ksp("androidx.room:room-compiler:$roomVersion")
+
+    // Gemini API
+    implementation("com.google.ai.client.generativeai:generativeai:0.2.1")
+
+    // PDF parsing
+    implementation("com.itextpdf:itext7-core:8.0.2")
+
+    // AndroidX components
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
+
+    // File utilities
+    implementation("androidx.documentfile:documentfile:1.0.1")
 }
