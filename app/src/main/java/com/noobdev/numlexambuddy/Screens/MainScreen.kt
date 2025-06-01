@@ -36,6 +36,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.noobdev.numlexambuddy.ui.theme.*
+import com.noobdev.numlexambuddy.components.BottomNavBar
 
 /**
  * Enhanced feature item with engaging properties
@@ -83,7 +84,7 @@ fun MainScreen(
                 rating = 4.7f
             ),
             StudentFeatureItem(
-                title = "Video Lectures",
+                title = "Lectures",
                 subtitle = "Core concepts",
                 icon = Icons.Rounded.PlayCircleFilled,
                 backgroundColor = cardBackgroundColor,
@@ -108,10 +109,15 @@ fun MainScreen(
             )
         )
     }
-
     Scaffold(
         bottomBar = {
-            BottomNavBar()
+            BottomNavBar(
+                currentRoute = "main_screen",
+                onNavigateToMain = { /* Already on main */ },
+                onNavigateToPastPapers = onNavigateToPastPapers,
+                onNavigateToLectures = onNavigateToLectures,
+                onNavigateToStudyMaterial = onNavigateToStudyMaterial
+            )
         }
     ) { paddingValues ->
         Column(
@@ -383,43 +389,6 @@ fun SmallResourceCard(
                     )
                 }
             }
-        }
-    }
-}
-
-@Composable
-fun BottomNavBar() {
-    val primaryColor = Color(0xFF1E88E5) // Vibrant blue
-
-    NavigationBar(
-        containerColor = Color.White,
-        contentColor = primaryColor,
-        tonalElevation = 8.dp
-    ) {
-        val selectedItem by remember { mutableStateOf(0) }
-        val items = listOf(
-            "Home" to Icons.Rounded.Home,
-            "Explore" to Icons.Rounded.Search,
-            "Favorites" to Icons.Rounded.Favorite,
-            "Profile" to Icons.Rounded.Person
-        )
-
-        items.forEachIndexed { index, (title, icon) ->
-            NavigationBarItem(
-                icon = {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = title
-                    )
-                },
-                selected = selectedItem == index,
-                onClick = { /* Handle navigation */ },
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = primaryColor,
-                    unselectedIconColor = Color.Gray,
-                    indicatorColor = Color.White
-                )
-            )
         }
     }
 }

@@ -43,6 +43,7 @@ import com.noobdev.numlexambuddy.viewmodel.ProjectsViewModel
 import com.noobdev.numlexambuddy.viewmodel.ViewModelFactory
 import com.noobdev.numlexambuddy.model.Department
 import com.noobdev.numlexambuddy.model.Project
+import com.noobdev.numlexambuddy.components.BottomNavBar
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -51,7 +52,11 @@ fun ProjectsScreen(
     viewModel: ProjectsViewModel = viewModel(
         factory = ViewModelFactory(LocalContext.current)
     ),
-    onBackClick: () -> Unit = {}
+    onBackClick: () -> Unit = {},
+    onNavigateToMain: () -> Unit = {},
+    onNavigateToPastPapers: () -> Unit = {},
+    onNavigateToLectures: () -> Unit = {},
+    onNavigateToStudyMaterial: () -> Unit = {}
 ) {
     // Color definitions matching MainScreen
     val primaryColor = Color(0xFF1E88E5) // Vibrant blue
@@ -116,16 +121,27 @@ fun ProjectsScreen(
                 selectedDepartment!!.code,
                 "SEMESTER-${selectedSemester!!}",
                 selectedSubject!!
-            )
-        }
+            )        }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(backgroundGray)
-            .verticalScroll(rememberScrollState())
-    ) {
+    Scaffold(
+        bottomBar = {
+            BottomNavBar(
+                currentRoute = "projects",
+                onNavigateToMain = onNavigateToMain,
+                onNavigateToPastPapers = onNavigateToPastPapers,
+                onNavigateToLectures = onNavigateToLectures,
+                onNavigateToStudyMaterial = onNavigateToStudyMaterial
+            )
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .background(backgroundGray)
+                .verticalScroll(rememberScrollState())
+        ) {
         // Header section matching MainScreen style
         ProjectsHeaderSection(
             primaryColor = primaryColor,
@@ -195,11 +211,11 @@ fun ProjectsScreen(
             onProjectDownload = { project ->
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 viewModel.downloadProject(project)
-            },
-            primaryColor = primaryColor,
+            },            primaryColor = primaryColor,
             accentColor = accentColor,
             textColor = textPrimaryColor
         )
+        }
     }
 }
 

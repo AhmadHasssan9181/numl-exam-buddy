@@ -51,6 +51,7 @@ import com.noobdev.numlexambuddy.viewmodel.LecturesViewModel
 import com.noobdev.numlexambuddy.viewmodel.LecturesViewModelFactory
 import com.noobdev.numlexambuddy.model.Department
 import com.noobdev.numlexambuddy.model.Lecture
+import com.noobdev.numlexambuddy.components.BottomNavBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,7 +59,10 @@ fun LecturesScreen(
     viewModel: LecturesViewModel = viewModel(
         factory = LecturesViewModelFactory(LocalContext.current)
     ),
-    onBack: () -> Unit = {}
+    onBack: () -> Unit = {},
+    onNavigateToMain: () -> Unit = {},
+    onNavigateToPastPapers: () -> Unit = {},
+    onNavigateToStudyMaterial: () -> Unit = {}
 ) {
     // Color definitions matching MainScreen
     val primaryColor = Color(0xFF1E88E5) // Vibrant blue
@@ -96,16 +100,27 @@ fun LecturesScreen(
         lectures.filter { lecture ->
             searchQuery.isEmpty() ||
                     lecture.title.contains(searchQuery, ignoreCase = true) ||
-                    lecture.subject.contains(searchQuery, ignoreCase = true)
-        }
+                    lecture.subject.contains(searchQuery, ignoreCase = true)        }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(backgroundGray)
-            .verticalScroll(rememberScrollState())
-    ) {
+    Scaffold(
+        bottomBar = {
+            BottomNavBar(
+                currentRoute = "lectures",
+                onNavigateToMain = onNavigateToMain,
+                onNavigateToPastPapers = onNavigateToPastPapers,
+                onNavigateToLectures = { /* Already on lectures */ },
+                onNavigateToStudyMaterial = onNavigateToStudyMaterial
+            )
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .background(backgroundGray)
+                .verticalScroll(rememberScrollState())
+        ) {
         // Header section matching MainScreen style
         LecturesHeaderSection(
             primaryColor = primaryColor,
@@ -185,11 +200,11 @@ fun LecturesScreen(
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 viewModel.openLecture(lecture)
             },
-            onClearError = { viewModel.clearError() },
-            primaryColor = primaryColor,
+            onClearError = { viewModel.clearError() },            primaryColor = primaryColor,
             accentColor = accentColor,
             textColor = textPrimaryColor
         )
+        }
     }
 }
 
@@ -261,7 +276,7 @@ fun LecturesHeaderSection(
 
             // Title text
             Text(
-                text = "🎥 Video Lectures",
+                text = "Lectures",
                 style = MaterialTheme.typography.headlineSmall.copy(
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
@@ -376,7 +391,7 @@ fun LecturesSearchSection(
                     else Color.Red.copy(alpha = 0.15f)
                 ) {
                     Text(
-                        text = if (resultCount > 0) "🎥 Found $resultCount lectures"
+                        text = if (resultCount > 0) "Found $resultCount lectures"
                         else "❌ No lectures found",
                         style = MaterialTheme.typography.labelMedium.copy(
                             fontWeight = FontWeight.SemiBold,
@@ -789,14 +804,14 @@ fun LecturesWelcomeState(primaryColor: Color, textColor: Color) {
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "Ready to Learn? 🎥",
+                text = "Ready to Learn?",
                 style = MaterialTheme.typography.titleLarge.copy(
                     fontWeight = FontWeight.Bold,
                     color = textColor
                 )
             )
             Text(
-                text = "Use the filters above to find lecture videos for your courses. Start by selecting your department!",
+                text = "Use the filters above to find lecture for your courses. Start by selecting your department!",
                 style = MaterialTheme.typography.bodyMedium.copy(
                     color = textColor.copy(alpha = 0.7f)
                 ),

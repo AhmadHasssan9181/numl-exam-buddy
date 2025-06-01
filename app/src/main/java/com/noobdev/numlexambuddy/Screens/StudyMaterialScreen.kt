@@ -44,6 +44,7 @@ import com.noobdev.numlexambuddy.viewmodel.StudyMaterialViewModel
 import com.noobdev.numlexambuddy.viewmodel.ViewModelFactory
 import com.noobdev.numlexambuddy.model.Department
 import com.noobdev.numlexambuddy.model.StudyMaterial
+import com.noobdev.numlexambuddy.components.BottomNavBar
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -52,7 +53,10 @@ fun StudyMaterialScreen(
     viewModel: StudyMaterialViewModel = viewModel(
         factory = ViewModelFactory(LocalContext.current)
     ),
-    onBackClick: () -> Unit = {}
+    onBackClick: () -> Unit = {},
+    onNavigateToMain: () -> Unit = {},
+    onNavigateToPastPapers: () -> Unit = {},
+    onNavigateToLectures: () -> Unit = {}
 ) {
     // Color definitions matching MainScreen
     val primaryColor = Color(0xFF1E88E5) // Vibrant blue
@@ -120,16 +124,27 @@ fun StudyMaterialScreen(
                 selectedDepartment!!.code,
                 "SEMESTER-${selectedSemester!!}",
                 selectedSubject!!
-            )
-        }
+            )        }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(backgroundGray)
-            .verticalScroll(rememberScrollState())
-    ) {
+    Scaffold(
+        bottomBar = {
+            BottomNavBar(
+                currentRoute = "study_material",
+                onNavigateToMain = onNavigateToMain,
+                onNavigateToPastPapers = onNavigateToPastPapers,
+                onNavigateToLectures = onNavigateToLectures,
+                onNavigateToStudyMaterial = { /* Already on study material */ }
+            )
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .background(backgroundGray)
+                .verticalScroll(rememberScrollState())
+        ) {
         // Header section matching MainScreen style
         StudyMaterialHeaderSection(
             primaryColor = primaryColor,
@@ -199,11 +214,11 @@ fun StudyMaterialScreen(
             onMaterialDownload = { material ->
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 viewModel.downloadStudyMaterial(material)
-            },
-            primaryColor = primaryColor,
+            },            primaryColor = primaryColor,
             accentColor = accentColor,
             textColor = textPrimaryColor
         )
+        }
     }
 }
 

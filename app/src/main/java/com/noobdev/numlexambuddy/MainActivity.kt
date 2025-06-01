@@ -80,8 +80,7 @@ fun AppNavHost(
                 }
             )
         }
-        
-        composable(NavRoutes.PAST_PAPERS) {
+          composable(NavRoutes.PAST_PAPERS) {
             // Implement back button handling for system navigation 
             BackHandler {
                 navController.popBackStack()
@@ -90,23 +89,43 @@ fun AppNavHost(
             PastPapersScreen(
                 onBack = {
                     navController.popBackStack()
+                },
+                onNavigateToMain = {
+                    navController.navigate(NavRoutes.MAIN_SCREEN) {
+                        popUpTo(NavRoutes.MAIN_SCREEN) { inclusive = false }
+                    }
+                },
+                onNavigateToLectures = {
+                    navController.navigate(NavRoutes.LECTURES)
+                },
+                onNavigateToStudyMaterial = {
+                    navController.navigate(NavRoutes.STUDY_MATERIAL)
                 }
             )
         }
-        
-        composable(NavRoutes.LECTURES) {
+          composable(NavRoutes.LECTURES) {
             BackHandler {
                 navController.popBackStack()
             }
-
+            
             LecturesScreen(
                 onBack = {
                     navController.popBackStack()
+                },
+                onNavigateToMain = {
+                    navController.navigate(NavRoutes.MAIN_SCREEN) {
+                        popUpTo(NavRoutes.MAIN_SCREEN) { inclusive = false }
+                    }
+                },
+                onNavigateToPastPapers = {
+                    navController.navigate(NavRoutes.PAST_PAPERS)
+                },
+                onNavigateToStudyMaterial = {
+                    navController.navigate(NavRoutes.STUDY_MATERIAL)
                 }
             )
         }
-        
-        composable(NavRoutes.STUDY_MATERIAL) {
+          composable(NavRoutes.STUDY_MATERIAL) {
             BackHandler {
                 navController.popBackStack()
             }
@@ -114,10 +133,21 @@ fun AppNavHost(
             StudyMaterialScreen(
                 onBackClick = {
                     navController.popBackStack()
+                },
+                onNavigateToMain = {
+                    navController.navigate(NavRoutes.MAIN_SCREEN) {
+                        popUpTo(NavRoutes.MAIN_SCREEN) { inclusive = false }
+                    }
+                },
+                onNavigateToPastPapers = {
+                    navController.navigate(NavRoutes.PAST_PAPERS)
+                },
+                onNavigateToLectures = {
+                    navController.navigate(NavRoutes.LECTURES)
                 }
-            )        }
-        
-        composable(NavRoutes.PROJECTS) {
+            )
+        }
+          composable(NavRoutes.PROJECTS) {
             BackHandler {
                 navController.popBackStack()
             }
@@ -125,6 +155,20 @@ fun AppNavHost(
             ProjectsScreen(
                 onBackClick = {
                     navController.popBackStack()
+                },
+                onNavigateToMain = {
+                    navController.navigate(NavRoutes.MAIN_SCREEN) {
+                        popUpTo(NavRoutes.MAIN_SCREEN) { inclusive = false }
+                    }
+                },
+                onNavigateToPastPapers = {
+                    navController.navigate(NavRoutes.PAST_PAPERS)
+                },
+                onNavigateToLectures = {
+                    navController.navigate(NavRoutes.LECTURES)
+                },
+                onNavigateToStudyMaterial = {
+                    navController.navigate(NavRoutes.STUDY_MATERIAL)
                 }
             )
         }

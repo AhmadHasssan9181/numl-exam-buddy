@@ -40,6 +40,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.noobdev.numlexambuddy.ui.theme.*
 import com.noobdev.numlexambuddy.viewmodel.PastPapersViewModel
 import com.noobdev.numlexambuddy.viewmodel.PastPapersViewModelFactory
+import com.noobdev.numlexambuddy.components.BottomNavBar
 import kotlinx.coroutines.delay
 
 // Data classes
@@ -63,7 +64,10 @@ fun PastPapersScreen(
     viewModel: PastPapersViewModel = viewModel(
         factory = PastPapersViewModelFactory(LocalContext.current)
     ),
-    onBack: () -> Unit = {}
+    onBack: () -> Unit = {},
+    onNavigateToMain: () -> Unit = {},
+    onNavigateToLectures: () -> Unit = {},
+    onNavigateToStudyMaterial: () -> Unit = {}
 ) {
     // Color definitions matching MainScreen
     val primaryColor = Color(0xFF1E88E5) // Vibrant blue
@@ -114,16 +118,27 @@ fun PastPapersScreen(
             val matchesSubject = selectedSubject == null ||
                     paper.subject == selectedSubject
 
-            matchesSearch && matchesDepartment && matchesSemester && matchesSubject
-        }
+            matchesSearch && matchesDepartment && matchesSemester && matchesSubject        }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(backgroundGray)
-            .verticalScroll(rememberScrollState())
-    ) {
+    Scaffold(
+        bottomBar = {
+            BottomNavBar(
+                currentRoute = "past_papers",
+                onNavigateToMain = onNavigateToMain,
+                onNavigateToPastPapers = { /* Already on past papers */ },
+                onNavigateToLectures = onNavigateToLectures,
+                onNavigateToStudyMaterial = onNavigateToStudyMaterial
+            )
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .background(backgroundGray)
+                .verticalScroll(rememberScrollState())
+        ) {
         // Header section matching MainScreen style
         HeaderSection(
             primaryColor = primaryColor,
@@ -203,11 +218,11 @@ fun PastPapersScreen(
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 viewModel.downloadPaper(paper)
             },
-            onClearError = { viewModel.clearError() },
-            primaryColor = primaryColor,
+            onClearError = { viewModel.clearError() },            primaryColor = primaryColor,
             accentColor = accentColor,
             textColor = textPrimaryColor
         )
+        }
     }
 }
 
