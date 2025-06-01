@@ -360,7 +360,7 @@ fun LecturesSearchSection(
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = accentColor,
-                        unfocusedBorderColor = Color.Gray.copy(alpha = 0.3f)
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
                     )
                 )
 
@@ -370,7 +370,7 @@ fun LecturesSearchSection(
                     onClick = onClose,
                     modifier = Modifier
                         .background(
-                            Color.Gray.copy(alpha = 0.1f),
+                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f),
                             CircleShape
                         )
                 ) {
@@ -844,7 +844,7 @@ fun LecturesList(
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Row(
@@ -1088,7 +1088,7 @@ fun LecturesDepartmentChip(
         ) {
             Surface(
                 shape = RoundedCornerShape(8.dp),
-                color = if (isSelected) accentColor.copy(alpha = 0.2f) else Color.Gray.copy(alpha = 0.1f)
+                color = if (isSelected) accentColor.copy(alpha = 0.2f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
             ) {
                 Text(
                     text = department.code,
@@ -1147,13 +1147,12 @@ fun LecturesSemesterChip(
             )
             .clickable { onClick() },
         contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = "$semester",
-            style = MaterialTheme.typography.titleMedium.copy(
-                fontWeight = FontWeight.Bold,
-                color = if (isSelected) Color.White else textColor
-            )
+    ) {            Text(
+                text = "$semester",
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.Bold,
+                    color = if (isSelected) MaterialTheme.colorScheme.onPrimary else textColor
+                )
         )
     }
 }

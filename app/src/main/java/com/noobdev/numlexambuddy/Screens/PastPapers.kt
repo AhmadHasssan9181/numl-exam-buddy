@@ -271,7 +271,7 @@ fun HeaderSection(
                         .size(40.dp)
                         .clickable { onBack() },
                     shape = CircleShape,
-                    color = Color.White.copy(alpha = 0.9f)
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
@@ -289,7 +289,7 @@ fun HeaderSection(
                         .size(40.dp)
                         .clickable { onSearch() },
                     shape = CircleShape,
-                    color = Color.White.copy(alpha = 0.9f)
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
@@ -302,14 +302,12 @@ fun HeaderSection(
                 }
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // Title text
+            Spacer(modifier = Modifier.height(20.dp))            // Title text
             Text(
                 text = "📚 Past Papers",
                 style = MaterialTheme.typography.headlineSmall.copy(
                     fontWeight = FontWeight.Bold,
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onPrimary,
                     fontSize = 20.sp,
                     lineHeight = 26.sp
                 )
@@ -318,7 +316,7 @@ fun HeaderSection(
             Text(
                 text = "Ace your exams with previous papers",
                 style = MaterialTheme.typography.bodyMedium.copy(
-                    color = Color.White.copy(alpha = 0.9f)
+                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f)
                 ),
                 modifier = Modifier.padding(top = 4.dp)
             )
@@ -700,12 +698,11 @@ fun SemesterChip(
             )
             .clickable { onSelect() },
         contentAlignment = Alignment.Center
-    ) {
-        Text(
+    ) {        Text(
             text = "$semester",
             style = MaterialTheme.typography.titleMedium.copy(
                 fontWeight = FontWeight.Bold,
-                color = if (selected) Color.White else textColor
+                color = if (selected) MaterialTheme.colorScheme.onPrimary else textColor
             )
         )
     }

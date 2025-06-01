@@ -374,7 +374,7 @@ fun StudyMaterialSearchSection(
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = accentColor,
-                        unfocusedBorderColor = Color.Gray.copy(alpha = 0.3f)
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
                     )
                 )
 
@@ -384,7 +384,7 @@ fun StudyMaterialSearchSection(
                     onClick = onClose,
                     modifier = Modifier
                         .background(
-                            Color.Gray.copy(alpha = 0.1f),
+                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f),
                             CircleShape
                         )
                 ) {
