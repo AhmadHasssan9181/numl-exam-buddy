@@ -52,6 +52,7 @@ import com.noobdev.numlexambuddy.viewmodel.LecturesViewModelFactory
 import com.noobdev.numlexambuddy.model.Department
 import com.noobdev.numlexambuddy.model.Lecture
 import com.noobdev.numlexambuddy.components.BottomNavBar
+import com.noobdev.numlexambuddy.ui.theme.customColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,12 +65,12 @@ fun LecturesScreen(
     onNavigateToPastPapers: () -> Unit = {},
     onNavigateToStudyMaterial: () -> Unit = {}
 ) {
-    // Color definitions matching MainScreen
-    val primaryColor = Color(0xFF1E88E5) // Vibrant blue
-    val accentColor = Color(0xFFFF9800) // Orange
-    val backgroundGray = Color(0xFFF5F5F5) // Light gray background
-    val cardBackgroundColor = Color(0xFFE8F5E9) // Light green background
-    val textPrimaryColor = Color(0xFF212121) // Dark text
+    // Use theme colors instead of hardcoded colors
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val accentColor = MaterialTheme.customColors.accentAmber
+    val backgroundGray = MaterialTheme.colorScheme.background
+    val cardBackgroundColor = MaterialTheme.colorScheme.surfaceVariant
+    val textPrimaryColor = MaterialTheme.colorScheme.onBackground
 
     val haptic = LocalHapticFeedback.current
 
@@ -113,12 +114,11 @@ fun LecturesScreen(
                 onNavigateToStudyMaterial = onNavigateToStudyMaterial
             )
         }
-    ) { paddingValues ->
-        Column(
+    ) { paddingValues ->        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .background(backgroundGray)
+                .background(MaterialTheme.colorScheme.background)
                 .verticalScroll(rememberScrollState())
         ) {
         // Header section matching MainScreen style
@@ -241,7 +241,7 @@ fun LecturesHeaderSection(
                         .size(40.dp)
                         .clickable { onBack() },
                     shape = CircleShape,
-                    color = Color.White.copy(alpha = 0.9f)
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
@@ -259,7 +259,7 @@ fun LecturesHeaderSection(
                         .size(40.dp)
                         .clickable { onSearch() },
                     shape = CircleShape,
-                    color = Color.White.copy(alpha = 0.9f)
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
@@ -279,7 +279,7 @@ fun LecturesHeaderSection(
                 text = "Lectures",
                 style = MaterialTheme.typography.headlineSmall.copy(
                     fontWeight = FontWeight.Bold,
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onPrimary,
                     fontSize = 20.sp,
                     lineHeight = 26.sp
                 )
@@ -288,7 +288,7 @@ fun LecturesHeaderSection(
             Text(
                 text = "Learn with comprehensive lecture videos",
                 style = MaterialTheme.typography.bodyMedium.copy(
-                    color = Color.White.copy(alpha = 0.9f)
+                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f)
                 ),
                 modifier = Modifier.padding(top = 4.dp)
             )
@@ -308,15 +308,15 @@ fun LecturesSearchSection(
     onSearchChange: (String) -> Unit,
     onClose: () -> Unit,
     resultCount: Int,
-    accentColor: Color,
-    textColor: Color
+    accentColor: Color = MaterialTheme.customColors.accentAmber,
+    textColor: Color = MaterialTheme.colorScheme.onBackground
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
@@ -388,14 +388,14 @@ fun LecturesSearchSection(
                 Surface(
                     shape = RoundedCornerShape(8.dp),
                     color = if (resultCount > 0) accentColor.copy(alpha = 0.15f)
-                    else Color.Red.copy(alpha = 0.15f)
+                    else MaterialTheme.colorScheme.error.copy(alpha = 0.15f)
                 ) {
                     Text(
                         text = if (resultCount > 0) "Found $resultCount lectures"
                         else "❌ No lectures found",
                         style = MaterialTheme.typography.labelMedium.copy(
                             fontWeight = FontWeight.SemiBold,
-                            color = if (resultCount > 0) accentColor else Color.Red
+                            color = if (resultCount > 0) accentColor else MaterialTheme.colorScheme.error
                         ),
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                     )
@@ -419,17 +419,17 @@ fun LecturesFiltersSection(
     onDepartmentSelect: (Department) -> Unit,
     onSemesterSelect: (Int) -> Unit,
     onSubjectSelect: (String) -> Unit,
-    primaryColor: Color,
-    accentColor: Color,
-    cardBackgroundColor: Color,
-    textColor: Color
+    primaryColor: Color = MaterialTheme.colorScheme.primary,
+    accentColor: Color = MaterialTheme.customColors.accentAmber,
+    cardBackgroundColor: Color = MaterialTheme.colorScheme.surfaceVariant,
+    textColor: Color = MaterialTheme.colorScheme.onBackground
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
@@ -545,8 +545,8 @@ fun LecturesFiltersSection(
 fun LecturesFilterCategory(
     title: String,
     isSelected: Boolean,
-    textColor: Color,
-    accentColor: Color,
+    textColor: Color = MaterialTheme.colorScheme.onBackground,
+    accentColor: Color = MaterialTheme.customColors.accentAmber,
     content: @Composable () -> Unit
 ) {
     Column {
@@ -595,9 +595,9 @@ fun LecturesResultsSection(
     selectedSubject: String?,
     onLectureOpen: (Lecture) -> Unit,
     onClearError: () -> Unit,
-    primaryColor: Color,
-    accentColor: Color,
-    textColor: Color
+    primaryColor: Color = MaterialTheme.colorScheme.primary,
+    accentColor: Color = MaterialTheme.customColors.accentAmber,
+    textColor: Color = MaterialTheme.colorScheme.onBackground
 ) {
     Column(
         modifier = Modifier
@@ -637,11 +637,14 @@ fun LecturesResultsSection(
  * Loading state with MainScreen styling
  */
 @Composable
-fun LecturesLoadingState(primaryColor: Color, textColor: Color) {
+fun LecturesLoadingState(
+    primaryColor: Color = MaterialTheme.colorScheme.primary,
+    textColor: Color = MaterialTheme.colorScheme.onBackground
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
@@ -682,12 +685,12 @@ fun LecturesLoadingState(primaryColor: Color, textColor: Color) {
 fun LecturesErrorState(
     error: String,
     onClearError: () -> Unit,
-    textColor: Color
+    textColor: Color = MaterialTheme.colorScheme.onBackground
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
@@ -695,11 +698,10 @@ fun LecturesErrorState(
                 .fillMaxWidth()
                 .padding(24.dp),
             horizontalAlignment =Alignment.CenterHorizontally
-        ) {
-            Icon(
+        ) {            Icon(
                 Icons.Rounded.ErrorOutline,
                 contentDescription = null,
-                tint = Color.Red,
+                tint = MaterialTheme.colorScheme.error,
                 modifier = Modifier.size(48.dp)
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -707,7 +709,7 @@ fun LecturesErrorState(
                 text = "Something Went Wrong",
                 style = MaterialTheme.typography.titleMedium.copy(
                     fontWeight = FontWeight.Bold,
-                    color = Color.Red
+                    color = MaterialTheme.colorScheme.error
                 )
             )
             Text(
@@ -721,7 +723,7 @@ fun LecturesErrorState(
             Button(
                 onClick = onClearError,
                 modifier = Modifier.padding(top = 16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Icon(
@@ -740,11 +742,14 @@ fun LecturesErrorState(
  * Empty state with MainScreen styling
  */
 @Composable
-fun LecturesEmptyState(primaryColor: Color, textColor: Color) {
+fun LecturesEmptyState(
+    primaryColor: Color = MaterialTheme.colorScheme.primary,
+    textColor: Color = MaterialTheme.colorScheme.onBackground
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
@@ -783,11 +788,14 @@ fun LecturesEmptyState(primaryColor: Color, textColor: Color) {
  * Welcome state with MainScreen styling
  */
 @Composable
-fun LecturesWelcomeState(primaryColor: Color, textColor: Color) {
+fun LecturesWelcomeState(
+    primaryColor: Color = MaterialTheme.colorScheme.primary,
+    textColor: Color = MaterialTheme.colorScheme.onBackground
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
@@ -829,8 +837,8 @@ fun LecturesWelcomeState(primaryColor: Color, textColor: Color) {
 fun LecturesList(
     lectures: List<Lecture>,
     onOpen: (Lecture) -> Unit,
-    accentColor: Color,
-    textColor: Color
+    accentColor: Color = MaterialTheme.customColors.accentAmber,
+    textColor: Color = MaterialTheme.colorScheme.onBackground
 ) {
     // Results header
     Card(
@@ -911,8 +919,8 @@ fun LecturesList(
 fun LectureCard(
     lecture: Lecture,
     onOpen: () -> Unit = {},
-    accentColor: Color,
-    textColor: Color
+    accentColor: Color = MaterialTheme.customColors.accentAmber,
+    textColor: Color = MaterialTheme.colorScheme.onBackground
 ) {
     var isExpanded by remember { mutableStateOf(false) }
     val scale by animateFloatAsState(
@@ -926,7 +934,7 @@ fun LectureCard(
             .scale(scale)
             .clickable { isExpanded = !isExpanded },
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
@@ -974,14 +982,13 @@ fun LectureCard(
             }
 
             Spacer(modifier = Modifier.height(12.dp))
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Surface(
                     shape = RoundedCornerShape(8.dp),
-                    color = Color.Gray.copy(alpha = 0.1f)
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
                 ) {
                     Text(
                         text = "Semester ${lecture.semester}",
@@ -995,7 +1002,7 @@ fun LectureCard(
 
                 Surface(
                     shape = RoundedCornerShape(8.dp),
-                    color = Color.Gray.copy(alpha = 0.1f)
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
                 ) {
                     Text(
                         text = lecture.department,
@@ -1013,13 +1020,12 @@ fun LectureCard(
                 visible = isExpanded,
                 enter = fadeIn(tween(200)) + expandVertically(),
                 exit = fadeOut(tween(200))
-            ) {
-                Button(
+            ) {                Button(
                     onClick = onOpen,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 16.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = accentColor),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.customColors.accentAmber),
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Icon(
@@ -1048,10 +1054,10 @@ fun LecturesDepartmentChip(
     department: Department,
     isSelected: Boolean,
     onClick: () -> Unit,
-    primaryColor: Color,
-    accentColor: Color,
-    cardBackgroundColor: Color,
-    textColor: Color
+    primaryColor: Color = MaterialTheme.colorScheme.primary,
+    accentColor: Color = MaterialTheme.customColors.accentAmber,
+    cardBackgroundColor: Color = MaterialTheme.colorScheme.surfaceVariant,
+    textColor: Color = MaterialTheme.colorScheme.onBackground
 ) {
     val scale by animateFloatAsState(
         targetValue = if (isSelected) 1.05f else 1f,
@@ -1066,7 +1072,7 @@ fun LecturesDepartmentChip(
             .clickable { onClick() },
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) cardBackgroundColor else Color.White
+            containerColor = if (isSelected) cardBackgroundColor else MaterialTheme.colorScheme.surface
         ),
         elevation = CardDefaults.cardElevation(
             defaultElevation = if (isSelected) 6.dp else 2.dp
@@ -1117,9 +1123,9 @@ fun LecturesSemesterChip(
     semester: Int,
     isSelected: Boolean,
     onClick: () -> Unit,
-    primaryColor: Color,
-    accentColor: Color,
-    textColor: Color
+    primaryColor: Color = MaterialTheme.colorScheme.primary,
+    accentColor: Color = MaterialTheme.customColors.accentAmber,
+    textColor: Color = MaterialTheme.colorScheme.onBackground
 ) {
     val scale by animateFloatAsState(
         targetValue = if (isSelected) 1.1f else 1f,
@@ -1131,12 +1137,12 @@ fun LecturesSemesterChip(
             .size(48.dp)
             .scale(scale)
             .background(
-                color = if (isSelected) accentColor else Color.Gray.copy(alpha = 0.2f),
+                color = if (isSelected) accentColor else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f),
                 shape = CircleShape
             )
             .border(
                 width = if (isSelected) 0.dp else 1.dp,
-                color = if (isSelected) Color.Transparent else Color.Gray.copy(alpha = 0.3f),
+                color = if (isSelected) Color.Transparent else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
                 shape = CircleShape
             )
             .clickable { onClick() },
@@ -1160,8 +1166,8 @@ fun LecturesSubjectChip(
     subject: String,
     isSelected: Boolean,
     onClick: () -> Unit,
-    accentColor: Color,
-    textColor: Color
+    accentColor: Color = MaterialTheme.customColors.accentAmber,
+    textColor: Color = MaterialTheme.colorScheme.onBackground
 ) {
     val scale by animateFloatAsState(
         targetValue = if (isSelected) 1.05f else 1f,
@@ -1173,7 +1179,7 @@ fun LecturesSubjectChip(
             .scale(scale)
             .clickable { onClick() },
         shape = RoundedCornerShape(20.dp),
-        color = if (isSelected) accentColor.copy(alpha = 0.2f) else Color.Gray.copy(alpha = 0.1f),
+        color = if (isSelected) accentColor.copy(alpha = 0.2f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
         border = if (isSelected) androidx.compose.foundation.BorderStroke(1.dp, accentColor.copy(alpha = 0.5f)) else null
     ) {
         Row(
