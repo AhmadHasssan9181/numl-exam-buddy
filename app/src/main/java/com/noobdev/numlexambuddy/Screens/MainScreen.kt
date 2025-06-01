@@ -1,21 +1,21 @@
 package com.noobdev.numlexambuddy.Screens
 
-import androidx.compose.animation.*
-import androidx.compose.animation.core.*
-import androidx.compose.foundation.Canvas
+import android.R.attr.resource
+import android.R.string.no
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.rounded.*
@@ -23,21 +23,19 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.*
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.*
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.noobdev.numlexambuddy.ui.theme.*
-import kotlinx.coroutines.delay
-import kotlin.math.*
 
 /**
  * Enhanced feature item with engaging properties
@@ -46,13 +44,13 @@ data class StudentFeatureItem(
     val title: String,
     val subtitle: String,
     val icon: ImageVector,
-    val gradientColors: List<Color>,
+    val backgroundColor: Color,
     val itemCount: String,
-    val trending: Boolean = false
+    val rating: Float = 4.5f,
 )
 
 /**
- * Dynamic MainScreen designed for students with rich animations and gradients
+ * Modernized MainScreen designed for students with clean UI
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -63,638 +61,364 @@ fun MainScreen(
     onNavigateToProjects: () -> Unit = {},
     onNavigateToDocuments: () -> Unit = {}
 ) {
-    // Animation states
-    var headerVisible by remember { mutableStateOf(false) }
-    var featuresVisible by remember { mutableStateOf(false) }
-    var visibleItemCount by remember { mutableStateOf(0) }
-
     // Haptic feedback
     val haptic = LocalHapticFeedback.current
 
-    // Floating animation for particles
-    val infiniteTransition = rememberInfiniteTransition(label = "particle_animation")
-    val particleAnimation by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 2 * PI.toFloat(),
-        animationSpec = infiniteRepeatable(
-            animation = tween(20000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "particle_rotation"
-    )
+    // Color definitions
+    val primaryColor = Color(0xFF1E88E5) // Vibrant blue
+    val accentColor = Color(0xFFFF9800) // Orange
+    val backgroundGray = Color(0xFFF5F5F5) // Light gray background
+    val cardBackgroundColor = Color(0xFFE8F5E9) // Light green background
+    val textPrimaryColor = Color(0xFF212121) // Dark text
 
-    // Scroll state for parallax
-    val scrollState = rememberScrollState()
-
-    // Student-focused features with vibrant gradients
-    val features = remember {
+    // Recommended study resources
+    val recommendedResources = remember {
         listOf(
             StudentFeatureItem(
                 title = "Past Papers",
-                subtitle = "Ace your exams with previous papers",
+                subtitle = "Exam preparation",
                 icon = Icons.Rounded.Assignment,
-                gradientColors = listOf(Color(0xFF667eea), Color(0xFF764ba2)),
+                backgroundColor = cardBackgroundColor,
                 itemCount = "200+",
-                trending = true
+                rating = 4.7f
             ),
             StudentFeatureItem(
                 title = "Video Lectures",
-                subtitle = "Learn from expert professors",
+                subtitle = "Core concepts",
                 icon = Icons.Rounded.PlayCircleFilled,
-                gradientColors = listOf(Color(0xFFf093fb), Color(0xFFf5576c)),
-                itemCount = "150+"
+                backgroundColor = cardBackgroundColor,
+                itemCount = "150+",
+                rating = 4.8f
             ),
             StudentFeatureItem(
                 title = "Study Notes",
-                subtitle = "Comprehensive study materials",
+                subtitle = "Comprehensive materials",
                 icon = Icons.AutoMirrored.Outlined.MenuBook,
-                gradientColors = listOf(Color(0xFF4facfe), Color(0xFF00f2fe)),
-                itemCount = "300+"
+                backgroundColor = cardBackgroundColor,
+                itemCount = "300+",
+                rating = 4.4f
             ),
             StudentFeatureItem(
                 title = "Projects Hub",
-                subtitle = "Explore amazing student projects",
+                subtitle = "Student projects",
                 icon = Icons.Rounded.Science,
-                gradientColors = listOf(Color(0xFF43e97b), Color(0xFF38f9d7)),
+                backgroundColor = cardBackgroundColor,
                 itemCount = "100+",
-                trending = true
+                rating = 4.2f
             )
         )
     }
 
-    // Staggered animations with improved timing
-    LaunchedEffect(Unit) {
-        delay(100)
-        headerVisible = true
-        delay(400)
-        featuresVisible = true
-
-        // Staggered feature cards reveal
-        for (i in 1..features.size) {
-            delay(120)
-            visibleItemCount = i
+    Scaffold(
+        bottomBar = {
+            BottomNavBar()
         }
-    }
-
-    Box(modifier = Modifier.fillMaxSize()) {
-        // Animated background with floating particles
-        AnimatedBackground(
-            particleAnimation = particleAnimation,
-            scrollOffset = scrollState.value
-        )
-
+    ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(scrollState)
+                .padding(paddingValues)
+                .background(backgroundGray)
+                .verticalScroll(rememberScrollState())
         ) {
-            // Dynamic header with parallax
-            AnimatedVisibility(
-                visible = headerVisible,
-                enter = slideInVertically(
-                    initialOffsetY = { -it / 2 },
-                    animationSpec = spring(
-                        dampingRatio = Spring.DampingRatioMediumBouncy,
-                        stiffness = Spring.StiffnessMedium
-                    )
-                ) + fadeIn(tween(600))
+            // Header section
+            HeaderSection(primaryColor)
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Recommended Section
+            Column(
+                modifier = Modifier.padding(horizontal = 16.dp)
             ) {
-                DynamicHeader(scrollOffset = scrollState.value)
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Features grid with staggered animations
-            AnimatedVisibility(
-                visible = featuresVisible,
-                enter = fadeIn(tween(600)) + slideInVertically(
-                    initialOffsetY = { it / 4 }
+                SectionHeader(
+                    title = "Study Material",
+                    onSeeAllClick = {},
+                    textColor = textPrimaryColor
                 )
-            ) {
-                Column(modifier = Modifier.padding(horizontal = 20.dp)) {
-                    // Section title with gradient text and improved spacing
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(bottom = 24.dp)
-                    ) {
-                        GradientText(
-                            text = "🎓 Academic Resources",
-                            style = MaterialTheme.typography.headlineSmall.copy(
-                                fontWeight = FontWeight.Bold
-                            ),
-                            gradientColors = listOf(
-                                Color(0xFF667eea),
-                                Color(0xFFf093fb)
-                            )
+
+                androidx.compose.foundation.lazy.grid.LazyVerticalGrid(
+                    columns = androidx.compose.foundation.lazy.grid.GridCells.Fixed(2),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(360.dp) // Adjust height as needed
+                ) {
+                    items(recommendedResources.size) { index ->
+                        ResourceCard(
+                            resource = recommendedResources[index],
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                when(recommendedResources[index].title) {
+                                    "Past Papers" -> onNavigateToPastPapers()
+                                    "Video Lectures" -> onNavigateToLectures()
+                                    "Study Notes" -> onNavigateToStudyMaterial()
+                                    "Projects Hub" -> onNavigateToProjects()
+                                }
+                            },
+                            accentColor = accentColor,
+                            textColor = textPrimaryColor
                         )
                     }
-
-                    LazyVerticalGrid(
-                        columns = GridCells.Fixed(2),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
-                        modifier = Modifier.height(480.dp),
-                        userScrollEnabled = false // Disable grid scrolling since parent scrolls
-                    ) {
-                        items(features.take(visibleItemCount)) { feature ->
-                            StudentFeatureCard(
-                                feature = feature,
-                                onClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    when(feature.title) {
-                                        "Past Papers" -> onNavigateToPastPapers()
-                                        "Video Lectures" -> onNavigateToLectures()
-                                        "Study Notes" -> onNavigateToStudyMaterial()
-                                        "Projects Hub" -> onNavigateToProjects()
-                                    }
-                                }
-                            )
-                        }
-                    }
                 }
             }
-
-            Spacer(modifier = Modifier.height(120.dp)) // Extra space for FAB
-        }
-
-        // Floating Action Button with improved animation
-        AnimatedVisibility(
-            visible = featuresVisible,
-            enter = scaleIn(
-                animationSpec = spring(
-                    dampingRatio = Spring.DampingRatioMediumBouncy,
-                    stiffness = Spring.StiffnessLow
-                )
-            ) + fadeIn(tween(400)),
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(24.dp)
-        ) {
-            PulsatingFAB(
-                onClick = {
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    // TODO: Add help functionality
-                }
-            )
         }
     }
 }
 
-/**
- * Optimized animated background with floating particles
- */
 @Composable
-fun AnimatedBackground(
-    particleAnimation: Float,
-    scrollOffset: Int
-) {
-    Canvas(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        // Gradient background
-        drawRect(
-            brush = Brush.verticalGradient(
-                colors = listOf(
-                    Color(0xFF1a1a2e),
-                    Color(0xFF16213e),
-                    Color(0xFF0f3460)
-                )
-            )
-        )
-
-        // Floating particles with optimized count
-        repeat(12) { index ->
-            val angle = particleAnimation + (index * 0.5f)
-            val radius = 40.dp.toPx() + (index * 12)
-            val centerX = size.width * 0.5f + cos(angle) * radius
-            val centerY = size.height * 0.3f + sin(angle * 0.8f) * radius - scrollOffset * 0.08f
-
-            drawCircle(
-                color = Color.White.copy(alpha = 0.08f - index * 0.004f),
-                radius = (4 - index * 0.25f).dp.toPx().coerceAtLeast(1.dp.toPx()),
-                center = Offset(centerX, centerY)
-            )
-        }
-
-        // Gradient orbs with better positioning
-        repeat(3) { index ->
-            val orbX = size.width * (0.15f + index * 0.35f)
-            val orbY = size.height * (0.12f + index * 0.08f) - scrollOffset * 0.04f
-
-            drawCircle(
-                brush = Brush.radialGradient(
-                    colors = listOf(
-                        Color(0xFF667eea).copy(alpha = 0.25f),
-                        Color.Transparent
-                    ),
-                    radius = 120.dp.toPx()
-                ),
-                radius = 120.dp.toPx(),
-                center = Offset(orbX, orbY)
-            )
-        }
-    }
-}
-
-/**
- * Optimized dynamic header with smoother parallax
- */
-@Composable
-fun DynamicHeader(scrollOffset: Int) {
-    val headerHeight = 180.dp
-    val parallaxOffset = scrollOffset * 0.2f
-
-    val logoRotation by rememberInfiniteTransition(label = "logo_rotation").animateFloat(
-        initialValue = 0f,
-        targetValue = 360f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(25000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "logo_spin"
-    )
-
+fun HeaderSection(primaryColor: Color) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(headerHeight)
-            .offset(y = (-parallaxOffset * 0.4f).dp)
+            .background(
+                color = primaryColor,
+                shape = RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp)
+            )
+            .padding(top = 24.dp, bottom = 20.dp)
     ) {
-        // Header gradient background
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(
-                            Color(0xFF667eea).copy(alpha = 0.85f),
-                            Color(0xFF764ba2).copy(alpha = 0.6f),
-                            Color.Transparent
-                        )
-                    )
-                )
-        )
-
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            modifier = Modifier.padding(horizontal = 20.dp)
         ) {
-            // Animated logo with glow effect
-            Box(
-                modifier = Modifier
-                    .size(80.dp)
-                    .rotate(logoRotation * 0.08f) // Slower rotation
+            // Top bar with profile and notification
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                // Glow effect
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(
-                            brush = Brush.radialGradient(
-                                colors = listOf(
-                                    Color(0xFF667eea).copy(alpha = 0.5f),
-                                    Color.Transparent
-                                )
-                            ),
-                            shape = CircleShape
-                        )
-                )
-
-                // Logo
+                // Profile icon - FIXED: Using Image instead of Icon for PNG
                 Surface(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.size(40.dp),
                     shape = CircleShape,
-                    color = Color.White.copy(alpha = 0.95f)
+                    color = Color.White.copy(alpha = 0.9f) // More opaque for better visibility
                 ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            imageVector = Icons.Rounded.School,
-                            contentDescription = "NUML Exam Buddy",
-                            tint = Color(0xFF667eea),
-                            modifier = Modifier.size(40.dp)
-                        )
-                    }
+                    Image(
+                        painter = painterResource(id = com.noobdev.numlexambuddy.R.drawable.numl_logo),
+                        contentDescription = "NUML Logo",
+                        modifier = Modifier
+                            .padding(1.dp)
+                            .fillMaxSize()
+                    )
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
-            // Animated title with improved shadow
+            // Welcome text
             Text(
-                text = "NUML Exam Buddy",
-                style = MaterialTheme.typography.headlineMedium.copy(
+                text = "Delicious knowledge ready to be delivered for you 📚",
+                style = MaterialTheme.typography.headlineSmall.copy(
                     fontWeight = FontWeight.Bold,
-                    shadow = Shadow(
-                        color = Color.Black.copy(alpha = 0.25f),
-                        offset = Offset(1f, 2f),
-                        blurRadius = 6f
-                    )
-                ),
-                color = Color.White
+                    color = Color.White,
+                    fontSize = 20.sp,
+                    lineHeight = 26.sp
+                )
             )
 
-            // Improved subtitle animation
-            AnimatedTypewriterText(
-                text = "Your ultimate academic companion 🚀",
-                style = MaterialTheme.typography.bodyLarge,
-                color = Color.White.copy(alpha = 0.9f)
-            )
+            Spacer(modifier = Modifier.height(80.dp))
         }
     }
 }
 
-/**
- * Optimized typewriter animation
- */
 @Composable
-fun AnimatedTypewriterText(
-    text: String,
-    style: androidx.compose.ui.text.TextStyle,
-    color: Color
+fun SectionHeader(
+    title: String,
+    onSeeAllClick: () -> Unit,
+    textColor: Color
 ) {
-    var displayedText by remember { mutableStateOf("") }
-    var currentIndex by remember { mutableStateOf(0) }
-
-    LaunchedEffect(text) {
-        currentIndex = 0
-        displayedText = ""
-        while (currentIndex < text.length) {
-            delay(40) // Slightly faster typing
-            displayedText = text.substring(0, currentIndex + 1)
-            currentIndex++
-        }
-    }
-
-    Text(
-        text = displayedText,
-        style = style,
-        color = color,
-        textAlign = TextAlign.Center
-    )
-}
-
-/**
- * Enhanced feature card with better performance
- */
-@Composable
-fun StudentFeatureCard(
-    feature: StudentFeatureItem,
-    onClick: () -> Unit
-) {
-    var isPressed by remember { mutableStateOf(false) }
-
-    val scale by animateFloatAsState(
-        targetValue = if (isPressed) 0.94f else 1f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessMedium
-        ),
-        label = "card_scale"
-    )
-
-    val elevation by animateFloatAsState(
-        targetValue = if (isPressed) 2f else 6f,
-        animationSpec = tween(150),
-        label = "card_elevation"
-    )
-
-    // Optimized particle animation
-    val particleOffset by rememberInfiniteTransition(label = "card_particles").animateFloat(
-        initialValue = 0f,
-        targetValue = 2 * PI.toFloat(),
-        animationSpec = infiniteRepeatable(
-            animation = tween(10000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "particle_movement"
-    )
-
-    Card(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(0.85f)
-            .graphicsLayer(
-                scaleX = scale,
-                scaleY = scale
-            )
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null
-            ) {
-                isPressed = true
-                onClick()
-            },
-        shape = RoundedCornerShape(24.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = elevation.dp)
+            .padding(vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    brush = Brush.linearGradient(
-                        colors = feature.gradientColors,
-                        start = Offset(0f, 0f),
-                        end = Offset(1000f, 1000f)
-                    )
-                )
-        ) {
-            // Optimized floating particles
-            Canvas(modifier = Modifier.fillMaxSize()) {
-                repeat(4) { index ->
-                    val angle = particleOffset + (index * 1.5f)
-                    val radius = 15.dp.toPx() + (index * 6)
-                    val centerX = size.width * 0.75f + cos(angle) * radius * 0.2f
-                    val centerY = size.height * 0.25f + sin(angle * 1.2f) * radius * 0.2f
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium.copy(
+                fontWeight = FontWeight.Bold,
+                color = textColor
+            )
+        )
+    }
+}
 
-                    drawCircle(
-                        color = Color.White.copy(alpha = 0.25f - index * 0.04f),
-                        radius = (2.5f - index * 0.4f).dp.toPx().coerceAtLeast(0.5.dp.toPx()),
-                        center = Offset(centerX, centerY)
-                    )
-                }
+@Composable
+fun ResourceCard(
+    resource: StudentFeatureItem,
+    onClick: () -> Unit,
+    accentColor: Color,
+    textColor: Color
+) {
+    Card(
+        modifier = Modifier
+            .width(160.dp)
+            .height(170.dp)
+            .clickable { onClick() },
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp) // Increased elevation for better visibility
+    ) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            // Resource icon as "image"
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(100.dp)
+                    .background(resource.backgroundColor),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = resource.icon,
+                    contentDescription = resource.title,
+                    tint = accentColor, // Use accent color for better visibility
+                    modifier = Modifier.size(48.dp)
+                )
             }
 
+            // Content
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(20.dp),
+                    .padding(12.dp),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
-                // Top section
+                Text(
+                    text = resource.title,
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp,
+                        color = textColor // Ensure readable text
+                    ),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun SmallResourceCard(
+    resource: StudentFeatureItem,
+    onClick: () -> Unit
+) {
+    val accentColor = Color(0xFFFF9800) // Orange
+    val textColor = Color(0xFF212121) // Dark text
+
+    Card(
+        modifier = Modifier
+            .width(240.dp)
+            .height(120.dp)
+            .clickable { onClick() },
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Row(modifier = Modifier.fillMaxSize()) {
+            // Resource icon as "image"
+            Box(
+                modifier = Modifier
+                    .size(120.dp)
+                    .background(resource.backgroundColor),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = resource.icon,
+                    contentDescription = resource.title,
+                    tint = accentColor,
+                    modifier = Modifier.size(42.dp)
+                )
+            }
+
+            // Content
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(12.dp),
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
                 Column {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.Top
-                    ) {
-                        // Icon with optimized glow
-                        Box {
-                            Box(
-                                modifier = Modifier
-                                    .size(50.dp)
-                                    .background(
-                                        Color.White.copy(alpha = 0.25f),
-                                        CircleShape
-                                    )
-                                    .blur(3.dp)
-                            )
-
-                            Surface(
-                                modifier = Modifier.size(48.dp),
-                                shape = CircleShape,
-                                color = Color.White.copy(alpha = 0.92f)
-                            ) {
-                                Box(contentAlignment = Alignment.Center) {
-                                    Icon(
-                                        imageVector = feature.icon,
-                                        contentDescription = feature.title,
-                                        tint = feature.gradientColors[0],
-                                        modifier = Modifier.size(28.dp)
-                                    )
-                                }
-                            }
-                        }
-
-                        // Trending badge
-                        if (feature.trending) {
-                            Surface(
-                                shape = RoundedCornerShape(12.dp),
-                                color = Color.White.copy(alpha = 0.2f)
-                            ) {
-                                Text(
-                                    text = "🔥",
-                                    modifier = Modifier.padding(6.dp),
-                                    style = MaterialTheme.typography.labelSmall
-                                )
-                            }
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
                     Text(
-                        text = feature.title,
-                        style = MaterialTheme.typography.titleLarge.copy(
-                            fontWeight = FontWeight.Bold
+                        text = resource.title,
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp,
+                            color = textColor
                         ),
-                        color = Color.White
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
 
                     Text(
-                        text = feature.subtitle,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.White.copy(alpha = 0.9f),
-                        lineHeight = 18.sp,
-                        modifier = Modifier.padding(top = 4.dp)
+                        text = resource.subtitle,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.DarkGray, // Darker for better readability
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
 
-                // Bottom section
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column {
-                        Text(
-                            text = feature.itemCount,
-                            style = MaterialTheme.typography.headlineSmall.copy(
-                                fontWeight = FontWeight.Bold
-                            ),
-                            color = Color.White
-                        )
-                        Text(
-                            text = "Resources",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = Color.White.copy(alpha = 0.8f)
-                        )
-                    }
-
-                    // Static arrow (removed animation for better performance)
+                // Rating row
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        imageVector = Icons.Rounded.ArrowForward,
-                        contentDescription = "Open",
-                        tint = Color.White,
-                        modifier = Modifier.size(24.dp)
+                        imageVector = Icons.Rounded.Star,
+                        contentDescription = "Rating",
+                        tint = accentColor,
+                        modifier = Modifier.size(14.dp)
+                    )
+
+                    Spacer(modifier = Modifier.width(2.dp))
+
+                    Text(
+                        text = "${resource.rating}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.DarkGray
+                    )
+
+                    Text(
+                        text = " · ${resource.itemCount}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.DarkGray
                     )
                 }
             }
         }
     }
-
-    // Reset pressed state
-    LaunchedEffect(isPressed) {
-        if (isPressed) {
-            delay(80)
-            isPressed = false
-        }
-    }
 }
 
-/**
- * Gradient text component
- */
 @Composable
-fun GradientText(
-    text: String,
-    style: androidx.compose.ui.text.TextStyle,
-    gradientColors: List<Color>
-) {
-    Text(
-        text = text,
-        style = style.copy(
-            brush = Brush.horizontalGradient(gradientColors)
-        )
-    )
-}
+fun BottomNavBar() {
+    val primaryColor = Color(0xFF1E88E5) // Vibrant blue
 
-/**
- * Enhanced FAB with click handler
- */
-@Composable
-fun PulsatingFAB(
-    onClick: () -> Unit
-) {
-    val scale by rememberInfiniteTransition(label = "fab_pulse").animateFloat(
-        initialValue = 1f,
-        targetValue = 1.08f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1200, easing = EaseInOutSine),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "fab_scale"
-    )
-
-    FloatingActionButton(
-        onClick = onClick,
-        modifier = Modifier
-            .size(64.dp)
-            .scale(scale),
-        containerColor = Color.Transparent,
-        elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 8.dp)
+    NavigationBar(
+        containerColor = Color.White,
+        contentColor = primaryColor,
+        tonalElevation = 8.dp
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    brush = Brush.linearGradient(
-                        colors = listOf(
-                            Color(0xFF667eea),
-                            Color(0xFFf093fb)
-                        )
-                    ),
-                    shape = CircleShape
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = Icons.Rounded.Help,
-                contentDescription = "Help",
-                tint = Color.White,
-                modifier = Modifier.size(28.dp)
+        val selectedItem by remember { mutableStateOf(0) }
+        val items = listOf(
+            "Home" to Icons.Rounded.Home,
+            "Explore" to Icons.Rounded.Search,
+            "Favorites" to Icons.Rounded.Favorite,
+            "Profile" to Icons.Rounded.Person
+        )
+
+        items.forEachIndexed { index, (title, icon) ->
+            NavigationBarItem(
+                icon = {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = title
+                    )
+                },
+                selected = selectedItem == index,
+                onClick = { /* Handle navigation */ },
+                colors = NavigationBarItemDefaults.colors(
+                    selectedIconColor = primaryColor,
+                    unselectedIconColor = Color.Gray,
+                    indicatorColor = Color.White
+                )
             )
         }
     }
@@ -702,7 +426,7 @@ fun PulsatingFAB(
 
 @Preview(showBackground = true, widthDp = 360, heightDp = 800)
 @Composable
-fun StudentMainScreenPreview() {
+fun StudentMainScreenPreviews() {
     NumlExamBuddyTheme {
         MainScreen()
     }

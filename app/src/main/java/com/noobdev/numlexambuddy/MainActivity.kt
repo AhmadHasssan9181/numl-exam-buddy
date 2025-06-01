@@ -19,9 +19,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.noobdev.numlexambuddy.Screens.MainScreen
 import com.noobdev.numlexambuddy.Screens.PastPapersScreen
 import com.noobdev.numlexambuddy.Screens.LecturesScreen
+import com.noobdev.numlexambuddy.Screens.MainScreen
 import com.noobdev.numlexambuddy.Screens.StudyMaterialScreen
 import com.noobdev.numlexambuddy.Screens.ProjectsScreen
 import com.noobdev.numlexambuddy.navigation.NavRoutes

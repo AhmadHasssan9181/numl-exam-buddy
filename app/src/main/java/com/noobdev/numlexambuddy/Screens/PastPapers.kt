@@ -7,7 +7,6 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -28,7 +27,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.*
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.*
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -43,7 +41,6 @@ import com.noobdev.numlexambuddy.ui.theme.*
 import com.noobdev.numlexambuddy.viewmodel.PastPapersViewModel
 import com.noobdev.numlexambuddy.viewmodel.PastPapersViewModelFactory
 import kotlinx.coroutines.delay
-import kotlin.math.*
 
 // Data classes
 data class Department(val name: String, val code: String)
@@ -58,7 +55,7 @@ data class Paper(
 )
 
 /**
- * Redesigned PastPapersScreen with modern student-friendly UI
+ * PastPapersScreen with MainScreen design consistency
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -68,26 +65,16 @@ fun PastPapersScreen(
     ),
     onBack: () -> Unit = {}
 ) {
+    // Color definitions matching MainScreen
+    val primaryColor = Color(0xFF1E88E5) // Vibrant blue
+    val accentColor = Color(0xFFFF9800) // Orange
+    val backgroundGray = Color(0xFFF5F5F5) // Light gray background
+    val cardBackgroundColor = Color(0xFFE8F5E9) // Light green background
+    val textPrimaryColor = Color(0xFF212121) // Dark text
+
     // Animation states
-    var headerVisible by remember { mutableStateOf(false) }
-    var filtersVisible by remember { mutableStateOf(false) }
-    var resultsVisible by remember { mutableStateOf(false) }
     var searchExpanded by remember { mutableStateOf(false) }
-
-    // Haptic feedback
     val haptic = LocalHapticFeedback.current
-
-    // Background animation
-    val infiniteTransition = rememberInfiniteTransition(label = "background_animation")
-    val backgroundAnimation by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 2 * PI.toFloat(),
-        animationSpec = infiniteRepeatable(
-            animation = tween(30000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "background_rotation"
-    )
 
     // Sample departments
     val departments = remember {
@@ -96,7 +83,8 @@ fun PastPapersScreen(
             Department("Artificial Intelligence", "BSAI"),
             Department("Information Technology", "BSIT"),
             Department("Software Engineering", "BSSE"),
-            Department("Associate Degree in Computing", "ADC")
+            Department("Cyber Security", "BSCY"),
+            Department("Data Science", "BSDS")
         )
     }
 
@@ -112,365 +100,316 @@ fun PastPapersScreen(
     val loading by viewModel.loading.collectAsState()
     val error by viewModel.error.collectAsState()
 
-    // Filter papers
-    val filteredPapers = remember(papers, searchQuery) {
+    // Enhanced paper filtering
+    val filteredPapers = remember(papers, searchQuery, selectedDepartment, selectedSemester, selectedSubject) {
         papers.filter { paper ->
-            searchQuery.isEmpty() ||
+            val matchesSearch = searchQuery.isEmpty() ||
                     paper.title.contains(searchQuery, ignoreCase = true) ||
-                    paper.subject.contains(searchQuery, ignoreCase = true)
+                    paper.subject.contains(searchQuery, ignoreCase = true) ||
+                    paper.department.contains(searchQuery, ignoreCase = true)
+            val matchesDepartment = selectedDepartment == null ||
+                    paper.department == selectedDepartment?.code
+            val matchesSemester = selectedSemester == null ||
+                    paper.semester == selectedSemester
+            val matchesSubject = selectedSubject == null ||
+                    paper.subject == selectedSubject
+
+            matchesSearch && matchesDepartment && matchesSemester && matchesSubject
         }
     }
 
-    // Entrance animations
-    LaunchedEffect(Unit) {
-        delay(100)
-        headerVisible = true
-        delay(200)
-        filtersVisible = true
-        delay(300)
-        resultsVisible = true
-    }
-
-    Box(modifier = Modifier.fillMaxSize()) {
-        // Animated background
-        StudyBackground(
-            animationProgress = backgroundAnimation,
-            alpha = 0.03f
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(backgroundGray)
+            .verticalScroll(rememberScrollState())
+    ) {
+        // Header section matching MainScreen style
+        HeaderSection(
+            primaryColor = primaryColor,
+            onBack = onBack,
+            onSearch = {
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                searchExpanded = !searchExpanded
+            }
         )
 
-        Column(modifier = Modifier.fillMaxSize()) {
-            // Modern Header
-            AnimatedVisibility(
-                visible = headerVisible,
-                enter = slideInVertically(
-                    initialOffsetY = { -it },
-                    animationSpec = spring(
-                        dampingRatio = Spring.DampingRatioMediumBouncy
-                    )
-                ) + fadeIn(tween(600))
-            ) {
-                ModernHeader(
-                    onBack = onBack,
-                    onSearch = { searchExpanded = !searchExpanded }
-                )
-            }
+        Spacer(modifier = Modifier.height(8.dp))
 
-            // Search Bar
-            AnimatedVisibility(
-                visible = searchExpanded,
-                enter = expandVertically(
-                    animationSpec = spring(
-                        dampingRatio = Spring.DampingRatioMediumBouncy
-                    )
-                ) + fadeIn()
-            ) {
-                SearchSection(
-                    searchQuery = searchQuery,
-                    onSearchChange = { searchQuery = it },
-                    onClose = { searchExpanded = false }
-                )
-            }
-
-            // Filters Section
-            AnimatedVisibility(
-                visible = filtersVisible,
-                enter = slideInVertically(
-                    initialOffsetY = { it / 4 },
-                    animationSpec = spring(
-                        dampingRatio = Spring.DampingRatioMediumBouncy
-                    )
-                ) + fadeIn(tween(800))
-            ) {
-                FiltersSection(
-                    departments = departments,
-                    selectedDepartment = selectedDepartment,
-                    selectedSemester = selectedSemester,
-                    selectedSubject = selectedSubject,
-                    subjects = subjects,
-                    onDepartmentSelect = { dept ->
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        selectedDepartment = if (selectedDepartment == dept) null else dept
-                        if (selectedDepartment != null) {
-                            viewModel.selectDegree(selectedDepartment!!.code)
-                        }
-                        selectedSemester = null
-                        selectedSubject = null
-                    },
-                    onSemesterSelect = { sem ->
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        selectedSemester = if (selectedSemester == sem) null else sem
-                        if (selectedDepartment != null && selectedSemester != null) {
-                            viewModel.selectSemester(selectedDepartment!!.code, selectedSemester!!)
-                        }
-                        selectedSubject = null
-                    },
-                    onSubjectSelect = { subj ->
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        selectedSubject = if (selectedSubject == subj) null else subj
-                        if (selectedDepartment != null && selectedSemester != null && selectedSubject != null) {
-                            viewModel.selectSubject(selectedDepartment!!.code, selectedSemester!!, selectedSubject!!)
-                        }
-                    }
-                )
-            }
-
-            // Results Section
-            AnimatedVisibility(
-                visible = resultsVisible,
-                enter = slideInVertically(
-                    initialOffsetY = { it / 2 }
-                ) + fadeIn(tween(1000))
-            ) {
-                ResultsSection(
-                    loading = loading,
-                    error = error,
-                    papers = filteredPapers,
-                    selectedDepartment = selectedDepartment,
-                    selectedSemester = selectedSemester,
-                    selectedSubject = selectedSubject,
-                    onPaperDownload = { paper ->
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        viewModel.downloadPaper(paper)
-                    },
-                    onClearError = { viewModel.clearError() }
-                )
-            }
+        // Search section
+        AnimatedVisibility(
+            visible = searchExpanded,
+            enter = expandVertically() + fadeIn()
+        ) {
+            SearchSection(
+                searchQuery = searchQuery,
+                onSearchChange = { searchQuery = it },
+                onClose = { searchExpanded = false },
+                resultCount = filteredPapers.size,
+                accentColor = accentColor,
+                textColor = textPrimaryColor
+            )
         }
+
+        // Filters section
+        FiltersSection(
+            departments = departments,
+            selectedDepartment = selectedDepartment,
+            selectedSemester = selectedSemester,
+            selectedSubject = selectedSubject,
+            subjects = subjects,
+            onDepartmentSelect = { dept ->
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                selectedDepartment = if (selectedDepartment == dept) null else dept
+                if (selectedDepartment != null) {
+                    viewModel.selectDegree(selectedDepartment!!.code)
+                }
+                selectedSemester = null
+                selectedSubject = null
+            },
+            onSemesterSelect = { sem ->
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                selectedSemester = if (selectedSemester == sem) null else sem
+                if (selectedDepartment != null && selectedSemester != null) {
+                    viewModel.selectSemester(selectedDepartment!!.code, selectedSemester!!)
+                }
+                selectedSubject = null
+            },
+            onSubjectSelect = { subj ->
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                selectedSubject = if (selectedSubject == subj) null else subj
+                if (selectedDepartment != null && selectedSemester != null && selectedSubject != null) {
+                    viewModel.selectSubject(selectedDepartment!!.code, selectedSemester!!, selectedSubject!!)
+                }
+            },
+            primaryColor = primaryColor,
+            accentColor = accentColor,
+            cardBackgroundColor = cardBackgroundColor,
+            textColor = textPrimaryColor
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Results section
+        ResultsSection(
+            loading = loading,
+            error = error,
+            papers = filteredPapers,
+            selectedDepartment = selectedDepartment,
+            selectedSemester = selectedSemester,
+            selectedSubject = selectedSubject,
+            searchQuery = searchQuery,
+            onPaperDownload = { paper ->
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                viewModel.downloadPaper(paper)
+            },
+            onClearError = { viewModel.clearError() },
+            primaryColor = primaryColor,
+            accentColor = accentColor,
+            textColor = textPrimaryColor
+        )
     }
 }
 
 /**
- * Animated background for papers screen
+ * Header section matching MainScreen design
  */
 @Composable
-fun StudyBackground(
-    animationProgress: Float,
-    alpha: Float = 0.05f
-) {
-    Canvas(modifier = Modifier.fillMaxSize()) {
-        // Gradient background
-        drawRect(
-            brush = Brush.verticalGradient(
-                colors = listOf(
-                    Color(0xFF1a1a2e).copy(alpha = 0.3f),
-                    Color(0xFF16213e).copy(alpha = 0.2f),
-                    Color.Transparent
-                )
-            )
-        )
-
-        // Floating academic elements
-        repeat(8) { index ->
-            val angle = animationProgress + (index * 0.8f)
-            val radius = 60.dp.toPx() + (index * 15)
-            val centerX = size.width * (0.2f + index * 0.1f) + cos(angle) * radius * 0.3f
-            val centerY = size.height * (0.1f + index * 0.08f) + sin(angle * 0.6f) * radius * 0.2f
-
-            // Academic icons as circles
-            drawCircle(
-                color = Color(0xFF667eea).copy(alpha = alpha),
-                radius = (6 - index * 0.5f).dp.toPx(),
-                center = Offset(centerX, centerY)
-            )
-        }
-
-        // Paper-like floating rectangles
-        repeat(5) { index ->
-            val angle = animationProgress * 0.7f + (index * 1.2f)
-            val offsetX = size.width * (0.3f + index * 0.15f) + cos(angle) * 40.dp.toPx()
-            val offsetY = size.height * (0.2f + index * 0.12f) + sin(angle * 0.8f) * 30.dp.toPx()
-
-            drawRoundRect(
-                color = Color.White.copy(alpha = alpha * 0.5f),
-                topLeft = Offset(offsetX, offsetY),
-                size = androidx.compose.ui.geometry.Size(
-                    width = 20.dp.toPx(),
-                    height = 25.dp.toPx()
-                ),
-                cornerRadius = androidx.compose.ui.geometry.CornerRadius(3.dp.toPx())
-            )
-        }
-    }
-}
-
-/**
- * Modern header with gradient and animations
- */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun ModernHeader(
+fun HeaderSection(
+    primaryColor: Color,
     onBack: () -> Unit,
     onSearch: () -> Unit
 ) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(120.dp)
             .background(
-                brush = Brush.linearGradient(
-                    colors = listOf(
-                        Color(0xFF667eea).copy(alpha = 0.9f),
-                        Color(0xFF764ba2).copy(alpha = 0.8f)
-                    ),
-                    start = Offset(0f, 0f),
-                    end = Offset(1000f, 800f)
-                )
+                color = primaryColor,
+                shape = RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp)
             )
+            .padding(top = 24.dp, bottom = 20.dp)
     ) {
-        // Header content
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+        Column(
+            modifier = Modifier.padding(horizontal = 20.dp)
         ) {
+            // Top bar with back and search
             Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Back button with glow
-                Box {
-                    Box(
-                        modifier = Modifier
-                            .size(44.dp)
-                            .background(
-                                Color.White.copy(alpha = 0.2f),
-                                CircleShape
-                            )
-                            .blur(2.dp)
-                    )
-
-                    Surface(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clickable { onBack() },
-                        shape = CircleShape,
-                        color = Color.White.copy(alpha = 0.15f)
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Icon(
-                                Icons.AutoMirrored.Outlined.ArrowBack,
-                                contentDescription = "Go back",
-                                tint = Color.White,
-                                modifier = Modifier.size(24.dp)
-                            )
-                        }
+                // Back button
+                Surface(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clickable { onBack() },
+                    shape = CircleShape,
+                    color = Color.White.copy(alpha = 0.9f)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            Icons.AutoMirrored.Outlined.ArrowBack,
+                            contentDescription = "Go back",
+                            tint = primaryColor,
+                            modifier = Modifier.size(24.dp)
+                        )
                     }
                 }
 
-                Spacer(modifier = Modifier.width(16.dp))
-
-                Column {
-                    Text(
-                        text = "📄 Past Papers",
-                        style = MaterialTheme.typography.headlineSmall.copy(
-                            fontWeight = FontWeight.Bold,
-                            shadow = Shadow(
-                                color = Color.Black.copy(alpha = 0.2f),
-                                offset = Offset(1f, 1f),
-                                blurRadius = 4f
-                            )
-                        ),
-                        color = Color.White
-                    )
-
-                    Text(
-                        text = "Access previous exam papers",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.White.copy(alpha = 0.8f)
-                    )
+                // Search button
+                Surface(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clickable { onSearch() },
+                    shape = CircleShape,
+                    color = Color.White.copy(alpha = 0.9f)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            Icons.Rounded.Search,
+                            contentDescription = "Search papers",
+                            tint = primaryColor,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
                 }
             }
 
-            // Search button
-            Surface(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clickable { onSearch() },
-                shape = CircleShape,
-                color = Color.White.copy(alpha = 0.15f)
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        Icons.Rounded.Search,
-                        contentDescription = "Search",
-                        tint = Color.White,
-                        modifier = Modifier.size(22.dp)
-                    )
-                }
-            }
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // Title text
+            Text(
+                text = "📚 Past Papers",
+                style = MaterialTheme.typography.headlineSmall.copy(
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    fontSize = 20.sp,
+                    lineHeight = 26.sp
+                )
+            )
+
+            Text(
+                text = "Ace your exams with previous papers",
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    color = Color.White.copy(alpha = 0.9f)
+                ),
+                modifier = Modifier.padding(top = 4.dp)
+            )
+
+            Spacer(modifier = Modifier.height(30.dp))
         }
     }
 }
 
 /**
- * Enhanced search section
+ * Search section with MainScreen styling
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchSection(
     searchQuery: String,
     onSearchChange: (String) -> Unit,
-    onClose: () -> Unit
+    onClose: () -> Unit,
+    resultCount: Int,
+    accentColor: Color,
+    textColor: Color
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp),
+            .padding(horizontal = 16.dp),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)
-        ),
-        elevation = CardDefaults.cardElevation(8.dp)
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .padding(16.dp)
         ) {
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = onSearchChange,
-                modifier = Modifier.weight(1f),
-                placeholder = {
-                    Text(
-                        "🔍 Search papers by title or subject...",
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = onSearchChange,
+                    modifier = Modifier.weight(1f),
+                    placeholder = {
+                        Text(
+                            "🔍 Search papers, subjects...",
+                            color = textColor.copy(alpha = 0.6f)
+                        )
+                    },
+                    leadingIcon = {
+                        Icon(
+                            Icons.Rounded.Search,
+                            contentDescription = null,
+                            tint = accentColor
+                        )
+                    },
+                    trailingIcon = if (searchQuery.isNotEmpty()) {
+                        {
+                            IconButton(onClick = { onSearchChange("") }) {
+                                Icon(
+                                    Icons.Rounded.Clear,
+                                    contentDescription = "Clear search",
+                                    tint = textColor.copy(alpha = 0.6f)
+                                )
+                            }
+                        }
+                    } else null,
+                    singleLine = true,
+                    shape = RoundedCornerShape(12.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = accentColor,
+                        unfocusedBorderColor = Color.Gray.copy(alpha = 0.3f)
                     )
-                },
-                leadingIcon = {
+                )
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                IconButton(
+                    onClick = onClose,
+                    modifier = Modifier
+                        .background(
+                            Color.Gray.copy(alpha = 0.1f),
+                            CircleShape
+                        )
+                ) {
                     Icon(
-                        Icons.Rounded.Search,
-                        contentDescription = null,
-                        tint = Color(0xFF667eea)
+                        Icons.Rounded.KeyboardArrowUp,
+                        contentDescription = "Close search",
+                        tint = textColor.copy(alpha = 0.7f)
                     )
-                },
-                singleLine = true,
-                shape = RoundedCornerShape(12.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color(0xFF667eea),
-                    unfocusedBorderColor = Color.Transparent,
-                    focusedContainerColor = Color(0xFF667eea).copy(alpha = 0.05f),
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surface
-                )
-            )
+                }
+            }
 
-            Spacer(modifier = Modifier.width(8.dp))
-
-            IconButton(onClick = onClose) {
-                Icon(
-                    Icons.Rounded.Close,
-                    contentDescription = "Close search",
-                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                )
+            // Results indicator
+            if (searchQuery.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = if (resultCount > 0) accentColor.copy(alpha = 0.15f)
+                    else Color.Red.copy(alpha = 0.15f)
+                ) {
+                    Text(
+                        text = if (resultCount > 0) "📋 Found $resultCount papers"
+                        else "❌ No papers found",
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            fontWeight = FontWeight.SemiBold,
+                            color = if (resultCount > 0) accentColor else Color.Red
+                        ),
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                    )
+                }
             }
         }
     }
 }
 
 /**
- * Enhanced filters section with better design
+ * Filters section with MainScreen design
  */
 @Composable
 fun FiltersSection(
@@ -481,113 +420,117 @@ fun FiltersSection(
     subjects: List<String>,
     onDepartmentSelect: (Department) -> Unit,
     onSemesterSelect: (Int) -> Unit,
-    onSubjectSelect: (String) -> Unit
+    onSubjectSelect: (String) -> Unit,
+    primaryColor: Color,
+    accentColor: Color,
+    cardBackgroundColor: Color,
+    textColor: Color
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)
-        ),
-        elevation = CardDefaults.cardElevation(4.dp)
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp)
+                .padding(16.dp)
         ) {
             // Section header
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(bottom = 16.dp)
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(32.dp)
-                        .background(
-                            Color(0xFF667eea).copy(alpha = 0.1f),
-                            CircleShape
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        Icons.Rounded.FilterList,
-                        contentDescription = null,
-                        tint = Color(0xFF667eea),
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(12.dp))
-
+                Icon(
+                    Icons.Rounded.Tune,
+                    contentDescription = null,
+                    tint = accentColor,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    "Filter Papers",
-                    style = MaterialTheme.typography.titleLarge.copy(
-                        fontWeight = FontWeight.Bold
-                    ),
-                    color = MaterialTheme.colorScheme.onSurface
+                    "Filters",
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = textColor
+                    )
                 )
             }
 
             // Department selection
             FilterCategory(
-                title = "📚 Department",
-                description = "Select your department"
+                title = "Department",
+                isSelected = selectedDepartment != null,
+                textColor = textColor,
+                accentColor = accentColor
             ) {
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     contentPadding = PaddingValues(vertical = 8.dp)
                 ) {
                     items(departments) { department ->
-                        ModernDepartmentChip(
+                        DepartmentChip(
                             department = department,
                             selected = department == selectedDepartment,
-                            onSelect = { onDepartmentSelect(department) }
+                            onSelect = { onDepartmentSelect(department) },
+                            primaryColor = primaryColor,
+                            accentColor = accentColor,
+                            cardBackgroundColor = cardBackgroundColor,
+                            textColor = textColor
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             // Semester selection
             FilterCategory(
-                title = "📅 Semester",
-                description = "Choose semester"
+                title = "Semester",
+                isSelected = selectedSemester != null,
+                textColor = textColor,
+                accentColor = accentColor
             ) {
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     contentPadding = PaddingValues(vertical = 8.dp)
                 ) {
                     items((1..8).toList()) { semester ->
-                        ModernSemesterChip(
+                        SemesterChip(
                             semester = semester,
                             selected = semester == selectedSemester,
-                            onSelect = { onSemesterSelect(semester) }
+                            onSelect = { onSemesterSelect(semester) },
+                            primaryColor = primaryColor,
+                            accentColor = accentColor,
+                            textColor = textColor
                         )
                     }
                 }
             }
 
-            // Subject selection (only show if subjects available)
+            // Subject selection
             if (subjects.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(20.dp))
-
+                Spacer(modifier = Modifier.height(16.dp))
                 FilterCategory(
-                    title = "📖 Subject",
-                    description = "Pick a subject"
+                    title = "Subject",
+                    isSelected = selectedSubject != null,
+                    textColor = textColor,
+                    accentColor = accentColor
                 ) {
                     LazyRow(
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                         contentPadding = PaddingValues(vertical = 8.dp)
                     ) {
                         items(subjects) { subject ->
-                            ModernSubjectChip(
+                            SubjectChip(
                                 subject = subject,
                                 selected = subject == selectedSubject,
-                                onSelect = { onSubjectSelect(subject) }
+                                onSelect = { onSubjectSelect(subject) },
+                                accentColor = accentColor,
+                                textColor = textColor
                             )
                         }
                     }
@@ -598,126 +541,134 @@ fun FiltersSection(
 }
 
 /**
- * Filter category component
+ * Filter category header
  */
 @Composable
 fun FilterCategory(
     title: String,
-    description: String,
+    isSelected: Boolean,
+    textColor: Color,
+    accentColor: Color,
     content: @Composable () -> Unit
 ) {
     Column {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleMedium.copy(
-                fontWeight = FontWeight.SemiBold
-            ),
-            color = MaterialTheme.colorScheme.onSurface
-        )
-
-        Text(
-            text = description,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-            modifier = Modifier.padding(top = 2.dp, bottom = 8.dp)
-        )
-
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(bottom = 8.dp)
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleSmall.copy(
+                    fontWeight = FontWeight.Bold,
+                    color = textColor
+                )
+            )
+            if (isSelected) {
+                Spacer(modifier = Modifier.width(6.dp))
+                Surface(
+                    shape = CircleShape,
+                    color = accentColor.copy(alpha = 0.2f)
+                ) {
+                    Icon(
+                        Icons.Rounded.Check,
+                        contentDescription = "Selected",
+                        tint = accentColor,
+                        modifier = Modifier
+                            .size(16.dp)
+                            .padding(2.dp)
+                    )
+                }
+            }
+        }
         content()
     }
 }
 
 /**
- * Modern department chip with gradient
+ * Department chip with MainScreen styling
  */
 @Composable
-fun ModernDepartmentChip(
+fun DepartmentChip(
     department: Department,
     selected: Boolean,
-    onSelect: () -> Unit
+    onSelect: () -> Unit,
+    primaryColor: Color,
+    accentColor: Color,
+    cardBackgroundColor: Color,
+    textColor: Color
 ) {
-    val scale by animateFloatAsState(
-        targetValue = if (selected) 1.05f else 1f,
-        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
-        label = "department_scale"
-    )
-
     Card(
         modifier = Modifier
-            .scale(scale)
+            .width(120.dp)
+            .height(80.dp)
             .clickable { onSelect() },
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (selected)
-                Color(0xFF667eea).copy(alpha = 0.15f)
-            else
-                MaterialTheme.colorScheme.surface
+            containerColor = if (selected) cardBackgroundColor else Color.White
         ),
         elevation = CardDefaults.cardElevation(
             defaultElevation = if (selected) 6.dp else 2.dp
         ),
-        border = if (selected) null else BorderStroke(
-            1.dp,
-            MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
-        )
+        border = if (selected) BorderStroke(2.dp, accentColor.copy(alpha = 0.5f)) else null
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            Text(
-                text = department.code,
-                style = MaterialTheme.typography.labelLarge.copy(
-                    fontWeight = FontWeight.Bold
-                ),
-                color = if (selected) Color(0xFF667eea) else MaterialTheme.colorScheme.primary
-            )
-
+            Surface(
+                shape = RoundedCornerShape(8.dp),
+                color = if (selected) accentColor.copy(alpha = 0.2f) else Color.Gray.copy(alpha = 0.1f)
+            ) {
+                Text(
+                    text = department.code,
+                    style = MaterialTheme.typography.labelMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = if (selected) accentColor else textColor
+                    ),
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                )
+            }
+            Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = department.name,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+                style = MaterialTheme.typography.bodySmall.copy(
+                    fontWeight = FontWeight.Medium,
+                    color = textColor.copy(alpha = 0.8f)
+                ),
                 textAlign = TextAlign.Center,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(top = 4.dp)
+                fontSize = 10.sp
             )
         }
     }
 }
 
 /**
- * Modern semester chip
+ * Semester chip with MainScreen styling
  */
 @Composable
-fun ModernSemesterChip(
+fun SemesterChip(
     semester: Int,
     selected: Boolean,
-    onSelect: () -> Unit
+    onSelect: () -> Unit,
+    primaryColor: Color,
+    accentColor: Color,
+    textColor: Color
 ) {
-    val scale by animateFloatAsState(
-        targetValue = if (selected) 1.1f else 1f,
-        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
-        label = "semester_scale"
-    )
-
     Box(
         modifier = Modifier
-            .size(56.dp)
-            .scale(scale)
+            .size(48.dp)
             .background(
-                brush = if (selected) Brush.linearGradient(
-                    colors = listOf(Color(0xFF667eea), Color(0xFF764ba2))
-                ) else Brush.linearGradient(
-                    colors = listOf(
-                        MaterialTheme.colorScheme.surface,
-                        MaterialTheme.colorScheme.surface
-                    )
-                ),
+                color = if (selected) accentColor else Color.Gray.copy(alpha = 0.2f),
                 shape = CircleShape
             )
             .border(
-                width = if (selected) 0.dp else 2.dp,
-                color = if (selected) Color.Transparent else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                width = if (selected) 0.dp else 1.dp,
+                color = if (selected) Color.Transparent else Color.Gray.copy(alpha = 0.3f),
                 shape = CircleShape
             )
             .clickable { onSelect() },
@@ -726,60 +677,56 @@ fun ModernSemesterChip(
         Text(
             text = "$semester",
             style = MaterialTheme.typography.titleMedium.copy(
-                fontWeight = FontWeight.Bold
-            ),
-            color = if (selected) Color.White else MaterialTheme.colorScheme.onSurface
+                fontWeight = FontWeight.Bold,
+                color = if (selected) Color.White else textColor
+            )
         )
     }
 }
 
 /**
- * Modern subject chip
+ * Subject chip with MainScreen styling
  */
 @Composable
-fun ModernSubjectChip(
+fun SubjectChip(
     subject: String,
     selected: Boolean,
-    onSelect: () -> Unit
+    onSelect: () -> Unit,
+    accentColor: Color,
+    textColor: Color
 ) {
-    val scale by animateFloatAsState(
-        targetValue = if (selected) 1.03f else 1f,
-        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
-        label = "subject_scale"
-    )
-
     Surface(
-        modifier = Modifier
-            .scale(scale)
-            .clickable { onSelect() },
+        modifier = Modifier.clickable { onSelect() },
         shape = RoundedCornerShape(20.dp),
-        color = if (selected)
-            Color(0xFF43e97b).copy(alpha = 0.15f)
-        else
-            MaterialTheme.colorScheme.surface,
-        border = if (selected)
-            BorderStroke(
-            1.dp,
-            Color(0xFF43e97b).copy(alpha = 0.5f)
-        ) else
-            BorderStroke(
-            1.dp,
-            MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
-        )
+        color = if (selected) accentColor.copy(alpha = 0.2f) else Color.Gray.copy(alpha = 0.1f),
+        border = if (selected) BorderStroke(1.dp, accentColor.copy(alpha = 0.5f)) else null
     ) {
-        Text(
-            text = subject,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
-            style = MaterialTheme.typography.bodyMedium.copy(
-                fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal
-            ),
-            color = if (selected) Color(0xFF43e97b) else MaterialTheme.colorScheme.onSurface
-        )
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (selected) {
+                Icon(
+                    Icons.Rounded.CheckCircle,
+                    contentDescription = null,
+                    tint = accentColor,
+                    modifier = Modifier.size(16.dp)
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+            }
+            Text(
+                text = subject,
+                style = MaterialTheme.typography.bodySmall.copy(
+                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                    color = if (selected) accentColor else textColor
+                )
+            )
+        }
     }
 }
 
 /**
- * Enhanced results section
+ * Results section with MainScreen styling
  */
 @Composable
 fun ResultsSection(
@@ -789,99 +736,41 @@ fun ResultsSection(
     selectedDepartment: Department?,
     selectedSemester: Int?,
     selectedSubject: String?,
+    searchQuery: String,
     onPaperDownload: (Paper) -> Unit,
-    onClearError: () -> Unit
+    onClearError: () -> Unit,
+    primaryColor: Color,
+    accentColor: Color,
+    textColor: Color
 ) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
     ) {
-        // Results header
-        if (!loading && error == null) {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = Color(0xFF43e97b).copy(alpha = 0.1f)
-                )
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(
-                            modifier = Modifier
-                                .size(32.dp)
-                                .background(
-                                    Color(0xFF43e97b).copy(alpha = 0.2f),
-                                    CircleShape
-                                ),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                Icons.Rounded.Description,
-                                contentDescription = null,
-                                tint = Color(0xFF43e97b),
-                                modifier = Modifier.size(18.dp)
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.width(12.dp))
-
-                        Text(
-                            "Available Papers",
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontWeight = FontWeight.SemiBold
-                            ),
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-
-                    Surface(
-                        shape = RoundedCornerShape(12.dp),
-                        color = Color(0xFF43e97b).copy(alpha = 0.2f)
-                    ) {
-                        Text(
-                            text = "${papers.size} results",
-                            style = MaterialTheme.typography.labelLarge.copy(
-                                fontWeight = FontWeight.Bold
-                            ),
-                            color = Color(0xFF43e97b),
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                        )
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-
-        // Content
         when {
             loading -> {
-                LoadingState()
+                LoadingState(primaryColor = primaryColor, textColor = textColor)
             }
             error != null -> {
                 ErrorState(
                     error = error,
-                    onClearError = onClearError
+                    onClearError = onClearError,
+                    textColor = textColor
                 )
             }
-            papers.isEmpty() && selectedDepartment != null && selectedSemester != null && selectedSubject != null -> {
-                EmptyPapersState()
+            papers.isEmpty() && (selectedDepartment != null || selectedSemester != null || selectedSubject != null || searchQuery.isNotEmpty()) -> {
+                EmptyState(primaryColor = primaryColor, textColor = textColor)
             }
-            selectedDepartment == null || selectedSemester == null || selectedSubject == null -> {
-                SelectFiltersState()
+            selectedDepartment == null && selectedSemester == null && selectedSubject == null && searchQuery.isEmpty() -> {
+                WelcomeState(primaryColor = primaryColor, textColor = textColor)
             }
             else -> {
                 PapersList(
                     papers = papers,
-                    onDownload = onPaperDownload
+                    onDownload = onPaperDownload,
+                    accentColor = accentColor,
+                    textColor = textColor
                 )
             }
         }
@@ -889,16 +778,15 @@ fun ResultsSection(
 }
 
 /**
- * Loading state with animated indicator
+ * Loading state with MainScreen styling
  */
 @Composable
-fun LoadingState() {
+fun LoadingState(primaryColor: Color, textColor: Color) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)
-        )
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
             modifier = Modifier
@@ -907,23 +795,23 @@ fun LoadingState() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             CircularProgressIndicator(
-                color = Color(0xFF667eea),
+                color = primaryColor,
                 strokeWidth = 3.dp,
                 modifier = Modifier.size(48.dp)
             )
-
             Spacer(modifier = Modifier.height(16.dp))
-
             Text(
-                text = "Loading papers...",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                text = "Loading Papers...",
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.Bold,
+                    color = textColor
+                )
             )
-
             Text(
-                text = "Please wait while we fetch the latest papers",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                text = "Fetching the latest exam papers",
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    color = textColor.copy(alpha = 0.6f)
+                ),
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(top = 4.dp)
             )
@@ -932,81 +820,76 @@ fun LoadingState() {
 }
 
 /**
- * Error state
+ * Error state with MainScreen styling
  */
 @Composable
 fun ErrorState(
     error: String,
-    onClearError: () -> Unit
+    onClearError: () -> Unit,
+    textColor: Color
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.1f)
-        )
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment =Alignment.CenterHorizontally
         ) {
             Icon(
                 Icons.Rounded.ErrorOutline,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.error,
+                tint = Color.Red,
                 modifier = Modifier.size(48.dp)
             )
-
             Spacer(modifier = Modifier.height(16.dp))
-
             Text(
-                text = "Oops! Something went wrong",
+                text = "Something Went Wrong",
                 style = MaterialTheme.typography.titleMedium.copy(
-                    fontWeight = FontWeight.Bold
-                ),
-                color = MaterialTheme.colorScheme.error
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Red
+                )
             )
-
             Text(
                 text = error,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    color = textColor.copy(alpha = 0.7f)
+                ),
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(top = 8.dp)
             )
-
             Button(
                 onClick = onClearError,
                 modifier = Modifier.padding(top = 16.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.error
-                )
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
+                shape = RoundedCornerShape(12.dp)
             ) {
+                Icon(
+                    Icons.Rounded.Refresh,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(6.dp))
                 Text("Try Again")
             }
         }
     }
-
-    // Auto-clear error
-    LaunchedEffect(error) {
-        delay(5000)
-        onClearError()
-    }
 }
 
 /**
- * Empty papers state
+ * Empty state with MainScreen styling
  */
 @Composable
-fun EmptyPapersState() {
+fun EmptyState(primaryColor: Color, textColor: Color) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)
-        )
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
             modifier = Modifier
@@ -1017,24 +900,22 @@ fun EmptyPapersState() {
             Icon(
                 Icons.Rounded.SearchOff,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                tint = primaryColor.copy(alpha = 0.7f),
                 modifier = Modifier.size(64.dp)
             )
-
             Spacer(modifier = Modifier.height(16.dp))
-
             Text(
                 text = "No Papers Found",
                 style = MaterialTheme.typography.titleLarge.copy(
-                    fontWeight = FontWeight.Bold
-                ),
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    fontWeight = FontWeight.Bold,
+                    color = textColor
+                )
             )
-
             Text(
-                text = "We couldn't find any past papers for this combination. Try selecting different filters or check back later!",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                text = "Try adjusting your filters or search terms",
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    color = textColor.copy(alpha = 0.6f)
+                ),
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(top = 8.dp)
             )
@@ -1043,16 +924,15 @@ fun EmptyPapersState() {
 }
 
 /**
- * Select filters state
+ * Welcome state with MainScreen styling
  */
 @Composable
-fun SelectFiltersState() {
+fun WelcomeState(primaryColor: Color, textColor: Color) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xFF667eea).copy(alpha = 0.05f)
-        )
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
             modifier = Modifier
@@ -1061,26 +941,24 @@ fun SelectFiltersState() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Icon(
-                Icons.Rounded.Tune,
+                Icons.Rounded.MenuBook,
                 contentDescription = null,
-                tint = Color(0xFF667eea),
+                tint = primaryColor,
                 modifier = Modifier.size(64.dp)
             )
-
             Spacer(modifier = Modifier.height(16.dp))
-
             Text(
-                text = "Ready to Find Papers? 📚",
+                text = "Ready to Excel? 🎯",
                 style = MaterialTheme.typography.titleLarge.copy(
-                    fontWeight = FontWeight.Bold
-                ),
-                color = MaterialTheme.colorScheme.onSurface
+                    fontWeight = FontWeight.Bold,
+                    color = textColor
+                )
             )
-
             Text(
-                text = "Select your department, semester, and subject above to discover available past papers for your studies.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                text = "Use the filters above to find past papers for your studies. Start by selecting your department!",
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    color = textColor.copy(alpha = 0.7f)
+                ),
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(top = 8.dp)
             )
@@ -1089,176 +967,174 @@ fun SelectFiltersState() {
 }
 
 /**
- * Papers list
+ * Papers list with MainScreen styling
  */
 @Composable
 fun PapersList(
     papers: List<Paper>,
-    onDownload: (Paper) -> Unit
+    onDownload: (Paper) -> Unit,
+    accentColor: Color,
+    textColor: Color
 ) {
+    // Results header
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    Icons.Rounded.LibraryBooks,
+                    contentDescription = null,
+                    tint = accentColor,
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                Column {
+                    Text(
+                        "Papers Found",
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = textColor
+                        )
+                    )
+                    Text(
+                        "Ready for download",
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            color = textColor.copy(alpha = 0.7f)
+                        )
+                    )
+                }
+            }
+            Surface(
+                shape = RoundedCornerShape(12.dp),
+                color = accentColor.copy(alpha = 0.2f)
+            ) {
+                Text(
+                    text = "${papers.size}",
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = accentColor
+                    ),
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                )
+            }
+        }
+    }
+
+    Spacer(modifier = Modifier.height(12.dp))
+
+    // Papers list
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.height(400.dp) // Fixed height to prevent overflow
     ) {
         items(papers) { paper ->
-            ModernPaperCard(
+            PaperCard(
                 paper = paper,
-                onDownload = { onDownload(paper) }
+                onDownload = { onDownload(paper) },
+                accentColor = accentColor,
+                textColor = textColor
             )
-        }
-
-        item {
-            Spacer(modifier = Modifier.height(100.dp))
         }
     }
 }
 
 /**
- * Modern paper card with enhanced design
+ * Individual paper card with MainScreen styling
  */
 @Composable
-fun ModernPaperCard(
+fun PaperCard(
     paper: Paper,
-    onDownload: () -> Unit
+    onDownload: () -> Unit,
+    accentColor: Color,
+    textColor: Color
 ) {
-    var isExpanded by remember { mutableStateOf(false) }
-    val haptic = LocalHapticFeedback.current
-
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable {
-                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                isExpanded = !isExpanded
-            },
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 3.dp,
-            pressedElevation = 8.dp
-        )
+            .clickable { onDownload() },
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp)
+                .padding(16.dp)
         ) {
-            // Header row
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.Top
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = paper.title,
                         style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            color = textColor
                         ),
-                        color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )
-
+                    Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = paper.subject,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
-                        modifier = Modifier.padding(top = 4.dp)
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            color = textColor.copy(alpha = 0.7f)
+                        )
                     )
                 }
-
                 Surface(
-                    shape = RoundedCornerShape(12.dp),
-                    color = Color(0xFFf093fb).copy(alpha = 0.15f)
+                    shape = CircleShape,
+                    color = accentColor.copy(alpha = 0.2f)
                 ) {
-                    Text(
-                        text = paper.year,
-                        style = MaterialTheme.typography.labelLarge.copy(
-                            fontWeight = FontWeight.Bold
-                        ),
-                        color = Color(0xFFf093fb),
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+                    Icon(
+                        Icons.Rounded.FileDownload,
+                        contentDescription = "Download",
+                        tint = accentColor,
+                        modifier = Modifier
+                            .size(36.dp)
+                            .padding(8.dp)
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-            // Tags row
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Surface(
                     shape = RoundedCornerShape(8.dp),
-                    color = Color(0xFF667eea).copy(alpha = 0.15f)
+                    color = Color.Gray.copy(alpha = 0.1f)
                 ) {
                     Text(
                         text = "Semester ${paper.semester}",
-                        style = MaterialTheme.typography.labelMedium.copy(
-                            fontWeight = FontWeight.Medium
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.Medium,
+                            color = textColor.copy(alpha = 0.8f)
                         ),
-                        color = Color(0xFF667eea),
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                     )
                 }
-
-                Surface(
-                    shape = RoundedCornerShape(8.dp),
-                    color = Color(0xFF43e97b).copy(alpha = 0.15f)
-                ) {
-                    Text(
-                        text = paper.department,
-                        style = MaterialTheme.typography.labelMedium.copy(
-                            fontWeight = FontWeight.Medium
-                        ),
-                        color = Color(0xFF43e97b),
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                Text(
+                    text = paper.year,
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontWeight = FontWeight.Medium,
+                        color = textColor.copy(alpha = 0.6f)
                     )
-                }
-            }
-
-            // Download button
-            AnimatedVisibility(
-                visible = isExpanded,
-                enter = expandVertically(
-                    animationSpec = spring(
-                        dampingRatio = Spring.DampingRatioMediumBouncy
-                    )
-                ) + fadeIn()
-            ) {
-                Column {
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Button(
-                        onClick = onDownload,
-                        modifier = Modifier.fillMaxWidth(),
-                        enabled = paper.downloadUrl.isNotEmpty(),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF667eea),
-                            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant
-                        ),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Icon(
-                            if (paper.downloadUrl.isNotEmpty()) Icons.Rounded.Download else Icons.Rounded.ErrorOutline,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp)
-                        )
-
-                        Spacer(modifier = Modifier.width(8.dp))
-
-                        Text(
-                            text = if (paper.downloadUrl.isNotEmpty()) "Download Paper" else "Not Available",
-                            style = MaterialTheme.typography.labelLarge.copy(
-                                fontWeight = FontWeight.SemiBold
-                            )
-                        )
-                    }
-                }
+                )
             }
         }
     }
@@ -1266,8 +1142,8 @@ fun ModernPaperCard(
 
 @Preview(showBackground = true, widthDp = 360, heightDp = 800)
 @Composable
-fun ModernPastPapersScreenPreview() {
+fun PastPapersScreenPreview() {
     NumlExamBuddyTheme {
-        PastPapersScreen(onBack = {})
+        PastPapersScreen()
     }
 }
