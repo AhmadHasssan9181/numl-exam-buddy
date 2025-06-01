@@ -134,13 +134,13 @@ fun PastPapersScreen(
                 onNavigateToStudyMaterial = onNavigateToStudyMaterial,
                 onNavigateToPastPapers = { /* Already on PastPapers */ }
             )
-        },
-        containerColor = backgroundGray
+        }
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .background(backgroundGray)
         ) {
             // Header section
             HeaderSection(
