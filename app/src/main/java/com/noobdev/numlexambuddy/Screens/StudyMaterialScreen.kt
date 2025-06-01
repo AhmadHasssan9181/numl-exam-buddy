@@ -889,12 +889,10 @@ fun StudyMaterialsList(
         }
     }
 
-    Spacer(modifier = Modifier.height(12.dp))
-
-    // Materials list
+    Spacer(modifier = Modifier.height(12.dp))    // Materials list
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = Modifier.height(400.dp) // Fixed height to prevent overflow
+        modifier = Modifier.heightIn(min = 200.dp, max = 800.dp) // Responsive height
     ) {
         items(materials) { material ->
             StudyMaterialCard(

@@ -894,12 +894,10 @@ fun LecturesList(
         }
     }
 
-    Spacer(modifier = Modifier.height(12.dp))
-
-    // Lectures list
+    Spacer(modifier = Modifier.height(12.dp))    // Lectures list
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = Modifier.height(400.dp) // Fixed height to prevent overflow
+        modifier = Modifier.heightIn(min = 200.dp, max = 800.dp) // Responsive height
     ) {
         items(lectures) { lecture ->
             LectureCard(

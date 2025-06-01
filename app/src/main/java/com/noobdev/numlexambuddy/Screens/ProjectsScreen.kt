@@ -886,12 +886,10 @@ fun ProjectsList(
         }
     }
 
-    Spacer(modifier = Modifier.height(12.dp))
-
-    // Projects list
+    Spacer(modifier = Modifier.height(12.dp))    // Projects list
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = Modifier.height(400.dp) // Fixed height to prevent overflow
+        modifier = Modifier.heightIn(min = 200.dp, max = 800.dp) // Responsive height
     ) {
         items(projects) { project ->
             ProjectCard(
