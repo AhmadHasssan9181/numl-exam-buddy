@@ -10,6 +10,7 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
@@ -64,13 +65,14 @@ fun NumlExamBuddyTheme(
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
-
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
             window.statusBarColor = colorScheme.primary.toArgb()
+            window.navigationBarColor = colorScheme.surface.toArgb()
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
+            WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars = !darkTheme
         }
     }
 
@@ -80,3 +82,35 @@ fun NumlExamBuddyTheme(
         content = content
     )
 }
+
+// Theme utility extensions for easier access to custom colors
+object NumlTheme {
+    val accentAmber: Color @Composable get() = AccentAmber
+    val accentBlue: Color @Composable get() = AccentBlue
+    val accentTeal: Color @Composable get() = AccentTeal
+    val success: Color @Composable get() = Success
+    val warning: Color @Composable get() = Warning
+    val info: Color @Composable get() = Info
+}
+
+// Extension properties for MaterialTheme to access custom colors
+val MaterialTheme.customColors: NumlCustomColors
+    @Composable
+    get() = NumlCustomColors(
+        accentAmber = AccentAmber,
+        accentBlue = AccentBlue,
+        accentTeal = AccentTeal,
+        success = Success,
+        warning = Warning,
+        info = Info
+    )
+
+// Data class to hold custom colors not in Material 3 spec
+data class NumlCustomColors(
+    val accentAmber: Color,
+    val accentBlue: Color,
+    val accentTeal: Color,
+    val success: Color,
+    val warning: Color,
+    val info: Color
+)

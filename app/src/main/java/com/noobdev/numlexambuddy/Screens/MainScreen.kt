@@ -40,6 +40,7 @@ import com.noobdev.numlexambuddy.components.BottomNavBar
 
 /**
  * Enhanced feature item with engaging properties
+ * Theme Integration: Uses MaterialTheme colors for consistency
  */
 data class StudentFeatureItem(
     val title: String,
@@ -63,23 +64,21 @@ fun MainScreen(
     onNavigateToDocuments: () -> Unit = {}
 ) {
     // Haptic feedback
-    val haptic = LocalHapticFeedback.current
-
-    // Color definitions
-    val primaryColor = Color(0xFF1E88E5) // Vibrant blue
-    val accentColor = Color(0xFFFF9800) // Orange
-    val backgroundGray = Color(0xFFF5F5F5) // Light gray background
-    val cardBackgroundColor = Color(0xFFE8F5E9) // Light green background
-    val textPrimaryColor = Color(0xFF212121) // Dark text
-
+    val haptic = LocalHapticFeedback.current    // Use theme colors instead of hardcoded colors
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val accentColor = MaterialTheme.customColors.accentAmber
+    val backgroundGray = MaterialTheme.colorScheme.background
+    val cardBackgroundColor = MaterialTheme.colorScheme.surface
+    val textPrimaryColor = MaterialTheme.colorScheme.onBackground    // Recommended study resources
     // Recommended study resources
+    val surfaceColor = MaterialTheme.colorScheme.surface
     val recommendedResources = remember {
         listOf(
             StudentFeatureItem(
                 title = "Past Papers",
                 subtitle = "Exam preparation",
                 icon = Icons.Rounded.Assignment,
-                backgroundColor = cardBackgroundColor,
+                backgroundColor = surfaceColor,
                 itemCount = "200+",
                 rating = 4.7f
             ),
@@ -87,7 +86,7 @@ fun MainScreen(
                 title = "Lectures",
                 subtitle = "Core concepts",
                 icon = Icons.Rounded.PlayCircleFilled,
-                backgroundColor = cardBackgroundColor,
+                backgroundColor = surfaceColor,
                 itemCount = "150+",
                 rating = 4.8f
             ),
@@ -95,7 +94,7 @@ fun MainScreen(
                 title = "Study Notes",
                 subtitle = "Comprehensive materials",
                 icon = Icons.AutoMirrored.Outlined.MenuBook,
-                backgroundColor = cardBackgroundColor,
+                backgroundColor = surfaceColor,
                 itemCount = "300+",
                 rating = 4.4f
             ),
@@ -103,7 +102,7 @@ fun MainScreen(
                 title = "Projects Hub",
                 subtitle = "Student projects",
                 icon = Icons.Rounded.Science,
-                backgroundColor = cardBackgroundColor,
+                backgroundColor = surfaceColor,
                 itemCount = "100+",
                 rating = 4.2f
             )
@@ -196,7 +195,7 @@ fun HeaderSection(primaryColor: Color) {
                 Surface(
                     modifier = Modifier.size(40.dp),
                     shape = CircleShape,
-                    color = Color.White.copy(alpha = 0.9f) // More opaque for better visibility
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)
                 ) {
                     Image(
                         painter = painterResource(id = com.noobdev.numlexambuddy.R.drawable.numl_logo),
@@ -215,7 +214,7 @@ fun HeaderSection(primaryColor: Color) {
                 text = "Delicious knowledge ready to be delivered for you 📚",
                 style = MaterialTheme.typography.headlineSmall.copy(
                     fontWeight = FontWeight.Bold,
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onPrimary,
                     fontSize = 20.sp,
                     lineHeight = 26.sp
                 )
@@ -262,8 +261,8 @@ fun ResourceCard(
             .height(170.dp)
             .clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp) // Increased elevation for better visibility
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             // Resource icon as "image"
@@ -271,13 +270,13 @@ fun ResourceCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(100.dp)
-                    .background(resource.backgroundColor),
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = resource.icon,
                     contentDescription = resource.title,
-                    tint = accentColor, // Use accent color for better visibility
+                    tint = accentColor,
                     modifier = Modifier.size(48.dp)
                 )
             }
@@ -294,7 +293,7 @@ fun ResourceCard(
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.Bold,
                         fontSize = 14.sp,
-                        color = textColor // Ensure readable text
+                        color = MaterialTheme.colorScheme.onSurface
                     ),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -309,30 +308,25 @@ fun SmallResourceCard(
     resource: StudentFeatureItem,
     onClick: () -> Unit
 ) {
-    val accentColor = Color(0xFFFF9800) // Orange
-    val textColor = Color(0xFF212121) // Dark text
-
     Card(
         modifier = Modifier
             .width(240.dp)
             .height(120.dp)
             .clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Row(modifier = Modifier.fillMaxSize()) {
-            // Resource icon as "image"
+        Row(modifier = Modifier.fillMaxSize()) {            // Resource icon as "image"
             Box(
                 modifier = Modifier
                     .size(120.dp)
-                    .background(resource.backgroundColor),
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
                 contentAlignment = Alignment.Center
-            ) {
-                Icon(
+            ) {                Icon(
                     imageVector = resource.icon,
                     contentDescription = resource.title,
-                    tint = accentColor,
+                    tint = MaterialTheme.customColors.accentAmber,
                     modifier = Modifier.size(42.dp)
                 )
             }
@@ -344,13 +338,12 @@ fun SmallResourceCard(
                     .padding(12.dp),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
-                Column {
-                    Text(
+                Column {                    Text(
                         text = resource.title,
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Bold,
                             fontSize = 14.sp,
-                            color = textColor
+                            color = MaterialTheme.colorScheme.onSurface
                         ),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -359,18 +352,15 @@ fun SmallResourceCard(
                     Text(
                         text = resource.subtitle,
                         style = MaterialTheme.typography.bodySmall,
-                        color = Color.DarkGray, // Darker for better readability
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
-                }
-
-                // Rating row
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
+                }                // Rating row
+                Row(verticalAlignment = Alignment.CenterVertically) {                    Icon(
                         imageVector = Icons.Rounded.Star,
                         contentDescription = "Rating",
-                        tint = accentColor,
+                        tint = MaterialTheme.customColors.accentAmber,
                         modifier = Modifier.size(14.dp)
                     )
 
@@ -379,13 +369,13 @@ fun SmallResourceCard(
                     Text(
                         text = "${resource.rating}",
                         style = MaterialTheme.typography.bodySmall,
-                        color = Color.DarkGray
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
 
                     Text(
                         text = " · ${resource.itemCount}",
                         style = MaterialTheme.typography.bodySmall,
-                        color = Color.DarkGray
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
