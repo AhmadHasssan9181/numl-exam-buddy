@@ -2,14 +2,13 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    id("com.google.devtools.ksp") version "2.1.21-2.0.1"
-
+    id("com.google.devtools.ksp") version "2.0.0-1.0.21"
+    id("androidx.room") version "2.6.1" // Room plugin
 }
 
 android {
     namespace = "com.noobdev.numlexambuddy"
     compileSdk = 35
-
     defaultConfig {
         applicationId = "com.noobdev.numlexambuddy"
         minSdk = 24
@@ -18,6 +17,7 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
     }
 
     buildTypes {
@@ -37,9 +37,12 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
-
     buildFeatures {
         compose = true
+    }
+    
+    room {
+        schemaDirectory("$projectDir/schemas")
     }
 
     packaging {
@@ -60,6 +63,7 @@ android {
         }
     }
 }
+
 
 dependencies {
     implementation(libs.androidx.core.ktx)
@@ -86,15 +90,12 @@ dependencies {
     implementation("com.google.apis:google-api-services-drive:v3-rev20250511-2.0.0")
     implementation("com.google.auth:google-auth-library-oauth2-http:1.11.0")
     implementation("com.google.android.gms:play-services-auth:20.4.1")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
-
-    // Coroutines
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
-
-    // Room Database
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")    // Coroutines
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")// Room Database
     val roomVersion = "2.6.1"
     implementation("androidx.room:room-runtime:$roomVersion")
     implementation("androidx.room:room-ktx:$roomVersion")
+    implementation("androidx.room:room-common:$roomVersion")  // Added common module
     ksp("androidx.room:room-compiler:$roomVersion")  // Configured Room with KSP
 
     // Gemini API

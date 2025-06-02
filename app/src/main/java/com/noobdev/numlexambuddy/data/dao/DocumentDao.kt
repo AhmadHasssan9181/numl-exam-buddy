@@ -6,6 +6,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.RoomWarnings
 import androidx.room.Transaction
 import androidx.room.Update
 import com.noobdev.numlexambuddy.model.Document
@@ -18,6 +19,7 @@ import kotlinx.coroutines.flow.Flow
  * Provides methods to interact with the documents table in the database.
  */
 @Dao
+@RoomCompat
 interface DocumentDao {
 
     // Basic CRUD Operations
@@ -25,8 +27,7 @@ interface DocumentDao {
     /**
      * Insert a new document into the database
      * If there's a conflict (same document ID), replace the existing document
-     */
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+     */    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertDocument(document: Document): Long
     
     /**

@@ -6,6 +6,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.RoomWarnings
 import androidx.room.Transaction
 import androidx.room.Update
 import com.noobdev.numlexambuddy.model.ChatMessage
@@ -17,6 +18,7 @@ import kotlinx.coroutines.flow.Flow
  * Provides methods to interact with chat messages and sessions.
  */
 @Dao
+@RoomCompat
 interface ChatDao {
 
     // ChatMessage Operations
