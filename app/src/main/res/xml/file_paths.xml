@@ -9,4 +9,12 @@
     <cache-path
         name="temp"
         path="temp/" />
+    <!-- External files directory -->
+    <external-files-path 
+        name="external_files" 
+        path="." />
+    <!-- External cache directory -->
+    <external-cache-path 
+        name="external_cache" 
+        path="." />
 </paths>

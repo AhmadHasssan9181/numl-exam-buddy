@@ -209,4 +209,31 @@ object MimeTypeUtils {
             else -> "File"
         }
     }
+    
+    /**
+     * Gets the file name from a URI.
+     * @param context The application context.
+     * @param uri The URI.
+     * @return The file name, or null if it couldn't be determined.
+     */
+    fun getFileNameFromUri(context: Context, uri: Uri): String? {
+        var filename: String? = null
+        
+        // Try to get the display name from the content resolver
+        context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+            if (cursor.moveToFirst()) {
+                val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                if (nameIndex >= 0) {
+                    filename = cursor.getString(nameIndex)
+                }
+            }
+        }
+        
+        // If we couldn't get the name from the content resolver, try the last path segment
+        if (filename == null) {
+            filename = uri.lastPathSegment
+        }
+        
+        return filename
+    }
 }

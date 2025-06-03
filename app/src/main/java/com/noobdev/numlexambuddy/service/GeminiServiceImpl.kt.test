@@ -1,0 +1,13 @@
+    override suspend fun testConnection(): Result<String> = withContext(Dispatchers.IO) {
+        try {
+            val response = generativeModel.generateContent("Test connection")
+            if (response.text != null) {
+                Result.success("API Connection successful: ${response.text}")
+            } else {
+                Result.failure(IOException("Empty response"))
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "API connection error", e)
+            Result.failure(e)
+        }
+    }

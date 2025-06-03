@@ -324,4 +324,73 @@ object FileStorageUtils {
             }
         }
     }
+
+    /**
+     * Formats a file size for display.
+     * @param sizeBytes The size in bytes.
+     * @return A formatted string representation of the file size.
+     */
+    fun formatFileSize(sizeBytes: Long): String {
+        if (sizeBytes <= 0) return "0 B"
+        
+        val units = arrayOf("B", "KB", "MB", "GB", "TB")
+        val digitGroups = (Math.log10(sizeBytes.toDouble()) / Math.log10(1024.0)).toInt()
+        
+        return String.format("%.1f %s", sizeBytes / Math.pow(1024.0, digitGroups.toDouble()), units[digitGroups])
+    }
+
+    /**
+     * Share a document with other apps.
+     * @param context The application context.
+     * @param file The file to share.
+     * @param mimeType The MIME type of the file.
+     */
+    fun shareDocument(context: Context, file: File, mimeType: String) {
+        try {
+            val fileUri = FileProvider.getUriForFile(
+                context,
+                context.packageName + ".fileprovider",
+                file
+            )
+            
+            val shareIntent = android.content.Intent().apply {
+                action = android.content.Intent.ACTION_SEND
+                putExtra(android.content.Intent.EXTRA_STREAM, fileUri)
+                type = mimeType
+                addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            
+            context.startActivity(android.content.Intent.createChooser(shareIntent, "Share Document"))
+        } catch (e: Exception) {
+            e.printStackTrace()
+            // Handle error
+        }
+    }
+
+    /**
+     * Open a document with an appropriate app.
+     * @param context The application context.
+     * @param file The file to open.
+     * @param mimeType The MIME type of the file.
+     */
+    fun openDocument(context: Context, file: File, mimeType: String) {
+        try {
+            val fileUri = FileProvider.getUriForFile(
+                context,
+                context.packageName + ".fileprovider",
+                file
+            )
+            
+            val viewIntent = android.content.Intent().apply {
+                action = android.content.Intent.ACTION_VIEW
+                setDataAndType(fileUri, mimeType)
+                addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            
+            context.startActivity(viewIntent)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            // Handle error - no app available to handle this file type
+        }
+    }
 }

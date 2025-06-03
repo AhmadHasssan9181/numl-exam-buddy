@@ -9,11 +9,13 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import com.noobdev.numlexambuddy.data.dao.ChatDao
 import com.noobdev.numlexambuddy.data.dao.DocumentDao
 import com.noobdev.numlexambuddy.data.dao.DocumentQueryDao
+import com.noobdev.numlexambuddy.data.dao.DocumentSummaryDao
 import com.noobdev.numlexambuddy.model.ChatMessage
 import com.noobdev.numlexambuddy.model.ChatSession
 import com.noobdev.numlexambuddy.model.DateConverter
 import com.noobdev.numlexambuddy.model.Document
 import com.noobdev.numlexambuddy.model.DocumentStatusConverter
+import com.noobdev.numlexambuddy.model.DocumentSummary
 import com.noobdev.numlexambuddy.model.DocumentTypeConverter
 import com.noobdev.numlexambuddy.model.MessageRoleConverter
 import com.noobdev.numlexambuddy.model.StringListConverter
@@ -28,9 +30,10 @@ import kotlinx.coroutines.launch
     entities = [
         Document::class,
         ChatMessage::class,
-        ChatSession::class
+        ChatSession::class,
+        DocumentSummary::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = true
 )
 @TypeConverters(
@@ -40,12 +43,15 @@ import kotlinx.coroutines.launch
     MessageRoleConverter::class,
     StringListConverter::class
 )
-abstract class AppDatabase : RoomDatabase() {
-
-    /**
+abstract class AppDatabase : RoomDatabase() {    /**
      * Returns the DAO for accessing Document entities.
      */
     abstract fun documentDao(): DocumentDao
+    
+    /**
+     * Returns the DAO for document summaries.
+     */
+    abstract fun documentSummaryDao(): DocumentSummaryDao
 
     /**
      * Returns the DAO for complex document queries.

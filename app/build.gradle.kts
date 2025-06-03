@@ -1,9 +1,10 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.compose)
-    id("com.google.devtools.ksp") version "2.0.0-1.0.21"
+    alias(libs.plugins.ksp)
     id("androidx.room") version "2.6.1" // Room plugin
+    id("org.jetbrains.kotlin.kapt")
+    alias(libs.plugins.hilt.android)
 }
 
 android {
@@ -17,7 +18,17 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
+        
+        // Read the API key from local.properties
+        val properties = org.jetbrains.kotlin.konan.properties.Properties().apply {
+            val localPropertiesFile = project.rootProject.file("local.properties")
+            if (localPropertiesFile.exists()) {
+                load(localPropertiesFile.inputStream())
+            }
+        }
+        
+        // Add the Gemini API key as a BuildConfig field
+        buildConfigField("String", "GEMINI_API_KEY", "\"${properties.getProperty("gemini.api.key", "")}\"")
     }
 
     buildTypes {
@@ -39,6 +50,11 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
+    }
+    
+    composeOptions {
+        kotlinCompilerExtensionVersion = libs.versions.composeCompiler.get()
     }
     
     room {
@@ -96,12 +112,8 @@ dependencies {
     implementation("androidx.room:room-runtime:$roomVersion")
     implementation("androidx.room:room-ktx:$roomVersion")
     implementation("androidx.room:room-common:$roomVersion")  // Added common module
-    ksp("androidx.room:room-compiler:$roomVersion")  // Configured Room with KSP
-
-    // Gemini API
-    implementation("com.google.ai.client.generativeai:generativeai:0.2.1")
-
-    // PDF parsing
+    ksp("androidx.room:room-compiler:$roomVersion")  // Configured Room with KSP    // Gemini API
+    implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
     implementation("com.itextpdf:itext7-core:8.0.2")
 
     // AndroidX components
@@ -110,4 +122,10 @@ dependencies {
 
     // File utilities
     implementation("androidx.documentfile:documentfile:1.0.1")
+
+    // Dependency injection (for @Inject, @Singleton)
+    implementation("javax.inject:javax.inject:1")    // Hilt for dependency injection
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.compiler)
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 }

@@ -1,19 +1,24 @@
 package com.noobdev.numlexambuddy.data
 
+import com.noobdev.numlexambuddy.model.Document
 import com.noobdev.numlexambuddy.model.DocumentContent
 import java.util.Date
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.math.min
+import java.io.File
+import android.util.Log
+import com.noobdev.numlexambuddy.model.DocumentStatus
 
 /**
  * Utility for chunking document content for efficient AI processing
- */
-object DocumentContentHelper {
-    
+ */@Singleton
+class DocumentContentHelper @Inject constructor() {
     // Default size for text chunks (approx. 1000 tokens)
-    private const val DEFAULT_CHUNK_SIZE = 4000
+    private val DEFAULT_CHUNK_SIZE = 4000
     
     // Default overlap between chunks to maintain context
-    private const val DEFAULT_OVERLAP = 500
+    private  val DEFAULT_OVERLAP = 500
     
     /**
      * Splits document text into overlapping chunks for processing
@@ -144,5 +149,34 @@ object DocumentContentHelper {
         }
         
         return titles
+    }
+    
+    /**
+     * Gets the content chunks for a document (from file or database).
+     * Reads content from the document's file path and chunks it appropriately.
+     */
+    fun getDocumentContent(document: Document): List<DocumentContent> {
+        // Check if document has a valid file path
+        if (document.filePath.isNullOrEmpty() || document.status != DocumentStatus.COMPLETE) {
+            return emptyList()
+        }
+
+        try {
+            // Read the file content
+            val file = File(document.filePath)
+            if (!file.exists()) {
+                return emptyList()
+            }
+
+            // Read the file text
+            val fullText = file.readText()
+
+            // Use the existing chunking method to process the text
+            return chunkDocumentText(document.id, fullText)
+        } catch (e: Exception) {
+            // Log the error but don't crash
+            Log.e("DocumentContentHelper", "Error reading document content: ${e.message}", e)
+            return emptyList()
+        }
     }
 }

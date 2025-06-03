@@ -7,6 +7,8 @@ import androidx.room.Query
 import androidx.room.RewriteQueriesToDropUnusedColumns
 import androidx.room.RoomWarnings
 import androidx.room.Transaction
+import androidx.room.RawQuery
+import androidx.sqlite.db.SupportSQLiteQuery
 import com.noobdev.numlexambuddy.model.Document
 import com.noobdev.numlexambuddy.model.DocumentStatus
 import com.noobdev.numlexambuddy.model.DocumentType
@@ -119,6 +121,50 @@ interface DocumentQueryDao {/**
      */
     @Query("SELECT * FROM documents WHERE summary IS NULL AND status = :status")
     suspend fun getDocumentsRequiringSummary(status: DocumentStatus = DocumentStatus.COMPLETE): List<Document>
+    
+    /**
+     * Get documents that contain any of the specified tags.
+     * This implementation assumes tags are stored as a comma-separated string in the 'tags' column.
+     */
+    fun getDocumentsWithAnyTags(tags: List<String>): Flow<List<Document>> {
+        // Build a dynamic SQL query for any tag match
+        val queryStr = buildString {
+            append("SELECT * FROM documents WHERE ")
+            tags.forEachIndexed { i, tag ->
+                if (i > 0) append(" OR ")
+                append("tags LIKE '%")
+                append(tag.replace("'", "''"))
+                append("%'")
+            }
+        }
+        val query = androidx.sqlite.db.SimpleSQLiteQuery(queryStr)
+        return getDocumentsWithAnyTagsRaw(query)
+    }
+
+    @RawQuery(observedEntities = [Document::class])
+    fun getDocumentsWithAnyTagsRaw(query: SupportSQLiteQuery): Flow<List<Document>>
+
+    /**
+     * Get documents that contain all of the specified tags.
+     * This implementation assumes tags are stored as a comma-separated string in the 'tags' column.
+     */
+    fun getDocumentsWithAllTags(tags: List<String>): Flow<List<Document>> {
+        // Build a dynamic SQL query for all tag match
+        val queryStr = buildString {
+            append("SELECT * FROM documents WHERE ")
+            tags.forEachIndexed { i, tag ->
+                if (i > 0) append(" AND ")
+                append("tags LIKE '%")
+                append(tag.replace("'", "''"))
+                append("%'")
+            }
+        }
+        val query = androidx.sqlite.db.SimpleSQLiteQuery(queryStr)
+        return getDocumentsWithAllTagsRaw(query)
+    }
+
+    @RawQuery(observedEntities = [Document::class])
+    fun getDocumentsWithAllTagsRaw(query: SupportSQLiteQuery): Flow<List<Document>>
 }
 
 /**

@@ -69,8 +69,7 @@ fun MainScreen(
     val accentColor = MaterialTheme.customColors.accentAmber
     val backgroundGray = MaterialTheme.colorScheme.background
     val cardBackgroundColor = MaterialTheme.colorScheme.surface
-    val textPrimaryColor = MaterialTheme.colorScheme.onBackground    // Recommended study resources
-    // Recommended study resources
+    val textPrimaryColor = MaterialTheme.colorScheme.onBackground    // Recommended study resources    // Recommended study resources
     val surfaceColor = MaterialTheme.colorScheme.surface
     val recommendedResources = remember {
         listOf(
@@ -89,6 +88,14 @@ fun MainScreen(
                 backgroundColor = surfaceColor,
                 itemCount = "150+",
                 rating = 4.8f
+            ),
+            StudentFeatureItem(
+                title = "Documents",
+                subtitle = "Smart document assistant",
+                icon = Icons.Outlined.Description,
+                backgroundColor = surfaceColor,
+                itemCount = "New",
+                rating = 5.0f
             ),
             StudentFeatureItem(
                 title = "Study Notes",
@@ -149,8 +156,7 @@ fun MainScreen(
                         .fillMaxWidth()
                         .height(360.dp) // Adjust height as needed
                 ) {
-                    items(recommendedResources.size) { index ->
-                        ResourceCard(
+                    items(recommendedResources.size) { index ->                        ResourceCard(
                             resource = recommendedResources[index],                            onClick = {
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 when(recommendedResources[index].title) {
@@ -158,6 +164,7 @@ fun MainScreen(
                                     "Lectures" -> onNavigateToLectures()
                                     "Study Notes" -> onNavigateToStudyMaterial()
                                     "Projects Hub" -> onNavigateToProjects()
+                                    "Documents" -> onNavigateToDocuments()
                                 }
                             },
                             accentColor = accentColor,

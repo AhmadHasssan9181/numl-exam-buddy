@@ -9,5 +9,12 @@ object NavRoutes {
     const val LECTURES = "lectures"
     const val STUDY_MATERIAL = "study_material"
     const val PROJECTS = "projects"
+    
+    // Document feature routes
+    const val DOCUMENTS = "documents"
+    const val DOCUMENT_DETAIL = "document_detail"
+    const val DOCUMENT_CHAT = "document_chat"
+    const val DOCUMENT_ADD = "document_add"
+    
     // Add more routes as needed for other features
 }
