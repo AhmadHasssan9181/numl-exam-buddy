@@ -1,1 +1,5 @@
 /build
+# Ignore APK and release artifacts
+release/
+*.apk
+output-metadata.json
